@@ -1,0 +1,7 @@
+{
+  "name": "@leet-code-clone/client",
+  "version": "0.0.1",
+  "dependencies": {
+    "@leet-code-clone/client": "file:"
+  }
+}
