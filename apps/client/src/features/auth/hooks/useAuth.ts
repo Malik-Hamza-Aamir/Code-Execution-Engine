@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import api from '../../../utils/api.interceptor';
+import api from '../../../utils/api.member.interceptor';
 
 type LoginData = {
   email: string;

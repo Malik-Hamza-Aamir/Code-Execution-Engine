@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto/create-user.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -26,7 +26,9 @@ export class CommonRepository {
       const user = this.usersRepository.create(data);
       return await this.usersRepository.save(user);
     } catch (error: any) {
-      console.log('[db error]', error);
+      if (error.code === '23505') {
+        throw new ConflictException('Email is already registered');
+      }
       throw new InternalServerErrorException('Something went wrong');
     }
   }
