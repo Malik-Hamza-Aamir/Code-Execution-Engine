@@ -1,36 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import memberApi from '../utils/api.member.interceptor';
-import { useState } from 'react';
 import { signupSchema, SignupFormData } from "@leet-code-clone/types";
-import { toast } from 'react-toastify';
-import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../features/auth/hooks/useAuth';
 
 export function Signup() {
   const { register, handleSubmit, formState: { errors } } = useForm<SignupFormData>({ resolver: zodResolver(signupSchema) });
-
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-
-  const navigate = useNavigate();
+  const { registerUser, error: authError, loading } = useAuth();
 
   const onSubmit = async (data: SignupFormData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await memberApi.post('/auth/register',
-        {
-          ...data,
-          dob: new Date(data.dob).toISOString()
-        });
-      toast.success(response.data.message);
-      navigate('/login');
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
+    const payload = {
+      ...data,
+      dob: new Date(data.dob).toISOString()
+    };
+    registerUser('/auth/register', payload);
   };
 
   return (
@@ -52,9 +35,9 @@ export function Signup() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
+          {authError && (
             <div className="mb-4 p-3 bg-red-900/50 text-red-200 rounded-md text-sm">
-              {error}
+              {authError}
             </div>
           )}
 

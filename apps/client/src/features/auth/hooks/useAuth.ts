@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import api from '../../../utils/api.member.interceptor';
-
-type LoginData = {
-  email: string;
-  password: string;
-};
+import memberApi from '../../../utils/api.member.interceptor';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import {
+  SignupFormData,
+  LoginFormData as LoginData,
+} from '@leet-code-clone/types';
 
 export const useAuth = () => {
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -14,12 +16,26 @@ export const useAuth = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.post(url, data);
+      const response = await memberApi.post(url, data);
       localStorage.setItem('token', response.data.data.token);
-      return response.data;
+      navigate(response.data.data.redirectUrl);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
       throw err;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const registerUser = async (url: string, data: SignupFormData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await memberApi.post(url, data);
+      toast.success(response.data.message);
+      navigate(response.data.data.redirect);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Registration failed');
     } finally {
       setLoading(false);
     }
@@ -30,5 +46,5 @@ export const useAuth = () => {
     window.location.href = '/login';
   };
 
-  return { login, logout, error, loading };
+  return { login, registerUser, logout, error, loading };
 };

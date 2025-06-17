@@ -1,7 +1,5 @@
 import axios from 'axios';
 
-console.log("[api key member]", import.meta.env.VITE_MEMBER_API_URL);
-
 const memberApi = axios.create({
   baseURL: import.meta.env.VITE_MEMBER_API_URL,
 });

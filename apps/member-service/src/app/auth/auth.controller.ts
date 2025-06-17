@@ -25,11 +25,11 @@ export class AuthController {
 
   @Post('register')
   async registerUsers(@Body() createUserDto: CreateUserDto) {
-    const registeredUser = await this.authService.register(createUserDto);
+    const registeredUserResp = await this.authService.register(createUserDto);
     return new GenericResponseDto(
       true,
       'User Registered Successfully',
-      registeredUser
+      registeredUserResp
     );
   }
 

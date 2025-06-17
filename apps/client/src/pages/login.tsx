@@ -9,13 +9,7 @@ import { loginSchema, LoginFormData } from '@leet-code-clone/types';
 
 export function Login() {
   const { login, error: authError, loading } = useAuth();
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<LoginFormData>({
-    resolver: zodResolver(loginSchema),
-  });
+  const { register, handleSubmit, formState: { errors } } = useForm<LoginFormData>({ resolver: zodResolver(loginSchema) });
 
   const [isSocialLoading, setIsSocialLoading] = useState({
     google: false,
@@ -24,8 +18,7 @@ export function Login() {
 
   const onSubmit = async (data: LoginFormData) => {
     try {
-      await login(`${process.env.VITE_API_URL}/auth/login`, data);
-      window.location.href = '/';
+      await login('/auth/login', data);
     } catch (err) {
       console.error('Login error:', err);
     }

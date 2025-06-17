@@ -18,7 +18,8 @@ export class AuthService {
     const hashedPassword = await bcrypt.hash(createUserDto.password, salt);
 
     createUserDto = { ...createUserDto, password: hashedPassword };
-    return this.authRepository.createUser(createUserDto);
+    await this.authRepository.createUser(createUserDto);
+    return { redirect: "/login" }
   }
 
   async login(loginUserDto: LoginUserDto) {
