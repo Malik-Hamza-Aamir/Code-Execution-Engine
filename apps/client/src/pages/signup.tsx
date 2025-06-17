@@ -22,7 +22,7 @@ export function Signup() {
       const response = await memberApi.post('/auth/register',
         {
           ...data,
-          dob: new Date(data.dateOfBirth).toISOString()
+          dob: new Date(data.dob).toISOString()
         });
       toast.success(response.data.message);
       navigate('/login');
@@ -123,12 +123,12 @@ export function Signup() {
                 <input
                   id="dateOfBirth"
                   type="date"
-                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${errors.dateOfBirth ? 'border-red-500' : 'border-gray-600'
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${errors.dob ? 'border-red-500' : 'border-gray-600'
                     }`}
-                  {...register('dateOfBirth')}
+                  {...register('dob')}
                 />
-                {errors.dateOfBirth && (
-                  <p className="mt-1 text-sm text-red-400">{errors.dateOfBirth.message}</p>
+                {errors.dob && (
+                  <p className="mt-1 text-sm text-red-400">{errors.dob.message}</p>
                 )}
               </div>
             </div>
