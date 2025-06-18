@@ -34,10 +34,7 @@ export class AuthController {
   }
 
   @Post('login')
-  async loginUser(
-    @Body() loginUserDto: LoginUserDto,
-    @Res({ passthrough: true }) res: Response
-  ) {
+  async loginUser( @Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response ) {
     const result = await this.authService.login(loginUserDto);
     if (!result.success) {
       res.status(HttpStatus.UNAUTHORIZED);
