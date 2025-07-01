@@ -56,6 +56,15 @@ export class AuthController {
     });
   }
 
+  @UseGuards(JwtAuthGuard)
+  @Get('test')
+  async test(@Req() req: Request) {
+    return {
+      message: 'Protected route works!',
+      user: req.user, // This comes from the JWT payload
+    };
+  }
+
   @UseGuards(JwtRefreshGuard)
   @Get('refresh-token')
   async refreshToken(

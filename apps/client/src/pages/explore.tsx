@@ -1,6 +1,6 @@
 export function Explore() {
     return (
-        <div>explore</div>
+        <></>
     )
 }
 

@@ -19,7 +19,7 @@ export class AuthService {
 
     createUserDto = { ...createUserDto, password: hashedPassword };
     await this.authRepository.createUser(createUserDto);
-    return { redirect: "/login" }
+    return { redirect: '/login' };
   }
 
   async login(loginUserDto: LoginUserDto) {
@@ -37,20 +37,19 @@ export class AuthService {
 
     const { password: _, ...userWithoutPassword } = user;
 
-    const accessToken = this.jwtService.sign(
-      {
-        sub: user.id,
-        email: user.email,
-        username: user.username,
-        role: user.role,
-      },
-      { expiresIn: '15m' }
-    );
+    const payload = {
+      sub: user.id,
+      email: user.email,
+      username: user.username,
+      role: user.role,
+    };
 
-    const refreshToken = this.jwtService.sign(
-      { sub: user.id },
-      { expiresIn: '7d' }
-    );
+    const accessToken = this.jwtService.sign(payload, { expiresIn: '1d' });
+
+    const refreshToken = this.jwtService.sign(payload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    });
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -91,7 +90,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload, {
       secret: process.env.JWT_SECRET,
-      expiresIn: '15m',
+      expiresIn: '1d',
     });
 
     const refreshToken = this.jwtService.sign(payload, {
@@ -103,7 +102,6 @@ export class AuthService {
   }
 
   async generateJwt(user: any) {
-    console.log('[generate jwt]', user);
     const createUserDto: CreateUserDto = {
       email: user.emails[0].value,
       username: user.displayName,
