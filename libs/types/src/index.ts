@@ -1,2 +1,3 @@
-export * from './schemas/user.schema';
-export * from './interfaces/user';
+export * from './schemas/user.schema.js';
+export * from './interfaces/user.js';
+export * from './interfaces/enum.user.js';

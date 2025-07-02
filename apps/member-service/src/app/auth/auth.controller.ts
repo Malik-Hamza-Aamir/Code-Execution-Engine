@@ -18,6 +18,7 @@ import {
   JwtAuthGuard,
   JwtRefreshGuard,
 } from '@leet-code-clone/passport-auth';
+import { LoginFormData } from "@leet-code-clone/types";
 
 @Controller('auth')
 export class AuthController {

@@ -4,7 +4,7 @@ import {
   Column,
   CreateDateColumn,
 } from 'typeorm';
-// import { Role, Provider } from '@leet-code-clone/types';
+import { Role, Provider } from '@leet-code-clone/types';
 
 @Entity()
 export class User {
@@ -26,8 +26,8 @@ export class User {
   @Column({ nullable: true })
   googleId: string;
 
-  // @Column({ type: 'enum', enum: Provider, default: Provider.LOCAL })
-  // provider: string;
+  @Column({ type: 'enum', enum: Provider, default: Provider.LOCAL })
+  provider: string;
 
   @Column({ nullable: true })
   imgURL: string;
@@ -35,8 +35,8 @@ export class User {
   @Column()
   dob: Date;
 
-  // @Column({ type: 'enum', enum: Role, default: Role.USER })
-  // role: Role;
+  @Column({ type: 'enum', enum: Role, default: Role.USER })
+  role: Role;
 
   @CreateDateColumn()
   createdAt: Date;

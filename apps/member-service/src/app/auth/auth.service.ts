@@ -5,6 +5,8 @@ import { LoginUserDto } from '../shared/dto/login-user.dto/login-user.dto.js';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { CommonRepository } from '../shared/repository/common.repository.js';
+// import { User } from "@leet-code-clone/types";
+import { User } from "@leet-code-clone/types";
 
 @Injectable()
 export class AuthService {
