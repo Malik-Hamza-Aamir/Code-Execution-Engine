@@ -26,7 +26,7 @@ export function Login() {
 
   const handleSocialLogin = (provider: 'google' | 'github') => {
     setIsSocialLoading((prev) => ({ ...prev, [provider]: true }));
-    window.location.href = `${process.env.VITE_API_URL}/auth/${provider}`;
+    window.location.href = `${import.meta.env.VITE_MEMBER_API_URL}/auth/${provider}`;
   };
 
   return (

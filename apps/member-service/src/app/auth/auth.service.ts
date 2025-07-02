@@ -102,6 +102,7 @@ export class AuthService {
   }
 
   async generateJwt(user: any) {
+    console.log("[user]", user);
     const createUserDto: CreateUserDto = {
       email: user.emails[0].value,
       username: user.displayName,
@@ -109,10 +110,10 @@ export class AuthService {
       imgURL: user.photos[0].value,
       dob: '2025-05-14T00:00:00Z',
     };
-    const createdUser = await this.authRepository.createUser(createUserDto);
+    // const createdUser = await this.authRepository.createUser(createUserDto);
 
     const payload = {
-      sub: createdUser.id,
+      sub: "1",
       email: user.emails[0].value,
       username: user.displayName,
       role: user.role,

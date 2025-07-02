@@ -103,8 +103,7 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GitHubAuthGuard)
   async githubCallback(@Req() req: Request, @Res() res: Response) {
-    const token = await this.authService.generateJwt(req);
-    console.log('[token]', token);
+    const token = await this.authService.generateJwt(req.user);
     return res.redirect(`http://localhost:4200/callback?token=${token}`);
   }
 }
