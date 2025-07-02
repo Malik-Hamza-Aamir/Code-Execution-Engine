@@ -7,7 +7,6 @@ export type LoginFormData = z.infer<typeof loginSchema>;
 export type SignupFormData = z.infer<typeof signupSchema>;
 
 export type User = {
-  id: number;
   username: string;
   email: string;
   password: string | null;
@@ -15,6 +14,6 @@ export type User = {
   googleId: string | null;
   provider: Provider;
   imgUrl: string | null;
-  dob: string;
+  dob: string | null;
   role: Role;
 };

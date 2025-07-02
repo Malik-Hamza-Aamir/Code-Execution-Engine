@@ -5,8 +5,7 @@ import { LoginUserDto } from '../shared/dto/login-user.dto/login-user.dto.js';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
 import { CommonRepository } from '../shared/repository/common.repository.js';
-// import { User } from "@leet-code-clone/types";
-import { User } from "@leet-code-clone/types";
+import { User, Provider, Role } from '@leet-code-clone/types';
 
 @Injectable()
 export class AuthService {
@@ -103,23 +102,60 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async generateJwt(user: any) {
-    console.log("[user]", user);
-    const createUserDto: CreateUserDto = {
+  async generateGithubToken(user: any) {
+    const payload: User = {
       email: user.emails[0].value,
-      username: user.displayName,
-      password: '',
-      imgURL: user.photos[0].value,
-      dob: '2025-05-14T00:00:00Z',
+      username: user._json.name,
+      password: null,
+      githubId: user.id,
+      googleId: null,
+      provider: Provider.GITHUB,
+      imgUrl: user.photos[0].value,
+      dob: null,
+      role: Role.USER,
     };
-    // const createdUser = await this.authRepository.createUser(createUserDto);
 
-    const payload = {
-      sub: "1",
-      email: user.emails[0].value,
-      username: user.displayName,
-      role: user.role,
+    return this.generateJwt(payload);
+  }
+
+  async generateJwt(payload: User) {
+    const existingUser =
+      await this.authRepository.checkProfileAlreadyExistsUsingEmail(
+        payload.email
+      );
+
+    let userEntity;
+
+    if (existingUser) {
+      userEntity = existingUser;
+    } else {
+      userEntity = await this.authRepository.createNewUser(payload);
+    }
+
+    const jwtPayload = {
+      sub: userEntity.id,
+      email: userEntity.email,
+      username: userEntity.username,
+      role: userEntity.role,
     };
-    return this.jwtService.sign(payload);
+
+    const accessToken = this.jwtService.sign(jwtPayload, { expiresIn: '1d' });
+
+    const refreshToken = this.jwtService.sign(jwtPayload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' });
+
+    const expiresAt = new Date();
+    expiresAt.setDate(expiresAt.getDate() + 7);
+
+    await this.authRepository.saveRefreshToken({
+      userId: userEntity.id,
+      token: refreshToken,
+      expiresAt: expiresAt,
+    });
+
+    return {
+      success: true,
+      token: accessToken,
+      refreshToken,
+    };
   }
 }

@@ -1,10 +1,15 @@
-import { ConflictException, Injectable, InternalServerErrorException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto/create-user.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from '../entities/users.entities.js';
 import { RefreshToken } from '../entities/refresh-token.entities.js';
 import { DataSource } from 'typeorm';
+import { User as UserType } from '@leet-code-clone/types';
 
 interface IRefreshToken {
   userId: number;
@@ -85,6 +90,39 @@ export class CommonRepository {
     } catch (error) {
       console.log('[failed to get complete profile]', error);
       throw new InternalServerErrorException('Failed to Fetch Profile');
+    }
+  }
+
+  async checkProfileAlreadyExistsUsingEmail(email: string) {
+    try {
+      return await this.usersRepository.findOneBy({ email });
+    } catch (error) {
+      console.log('[failed to get profile]', error);
+      throw new InternalServerErrorException('Failed to Fetch Profile');
+    }
+  }
+
+  async createNewUser(user: UserType) {
+    try {
+      const newUser: Partial<User> = {
+        username: user.username,
+        email: user.email,
+        password: user.password ?? undefined,
+        githubId: user.githubId ?? undefined,
+        googleId: user.googleId ?? undefined,
+        provider: user.provider,
+        imgURL: user.imgUrl ?? undefined,
+        dob: user.dob ? new Date(user.dob) : undefined,
+        role: user.role,
+      };
+
+      const userResp = this.usersRepository.create(newUser);
+      return await this.usersRepository.save(userResp);
+    } catch (error: any) {
+      if (error.code === '23505') {
+        throw new ConflictException('Email is already registered');
+      }
+      throw new InternalServerErrorException('Something went wrong');
     }
   }
 }

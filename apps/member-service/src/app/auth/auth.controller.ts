@@ -18,7 +18,6 @@ import {
   JwtAuthGuard,
   JwtRefreshGuard,
 } from '@leet-code-clone/passport-auth';
-import { LoginFormData } from "@leet-code-clone/types";
 
 @Controller('auth')
 export class AuthController {
@@ -35,7 +34,10 @@ export class AuthController {
   }
 
   @Post('login')
-  async loginUser( @Body() loginUserDto: LoginUserDto, @Res({ passthrough: true }) res: Response ) {
+  async loginUser(
+    @Body() loginUserDto: LoginUserDto,
+    @Res({ passthrough: true }) res: Response
+  ) {
     const result = await this.authService.login(loginUserDto);
     if (!result.success) {
       res.status(HttpStatus.UNAUTHORIZED);
@@ -104,7 +106,15 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GitHubAuthGuard)
   async githubCallback(@Req() req: Request, @Res() res: Response) {
-    const token = await this.authService.generateJwt(req.user);
-    return res.redirect(`http://localhost:4200/callback?token=${token}`);
+    const result = await this.authService.generateGithubToken(req.user);
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.redirect(`http://localhost:4200/callback?token=${result.token}`);
   }
 }
