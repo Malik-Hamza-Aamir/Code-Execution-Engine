@@ -15,6 +15,7 @@ import { LoginUserDto } from '../shared/dto/login-user.dto/login-user.dto.js';
 import type { Request, Response } from 'express';
 import {
   GitHubAuthGuard,
+  GoogleAuthGuard,
   JwtAuthGuard,
   JwtRefreshGuard,
 } from '@leet-code-clone/passport-auth';
@@ -106,7 +107,27 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GitHubAuthGuard)
   async githubCallback(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.generateGithubToken(req.user);
+    const result = await this.authService.generateToken(req.user, "github");
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: false,
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.redirect(`http://localhost:4200/callback?token=${result.token}`);
+  }
+  
+  
+  @Get('google')
+  @UseGuards(GoogleAuthGuard)
+  googleLogin() {}
+
+  @Get('google/callback')
+  @UseGuards(GoogleAuthGuard)
+  async googleCallback(@Req() req: Request, @Res() res: Response) {
+    const result = await this.authService.generateToken(req.user, "google");
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,

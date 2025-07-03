@@ -102,14 +102,14 @@ export class AuthService {
     return { accessToken, refreshToken };
   }
 
-  async generateGithubToken(user: any) {
+  async generateToken(user: any, provider: string) {
     const payload: User = {
       email: user.emails[0].value,
       username: user._json.name,
       password: null,
-      githubId: user.id,
-      googleId: null,
-      provider: Provider.GITHUB,
+      githubId: provider === "github" ? user.id : null,
+      googleId: provider === "google" ? user.id : null,
+      provider: provider === "github" ? Provider.GITHUB : Provider.GOOGLE,
       imgUrl: user.photos[0].value,
       dob: null,
       role: Role.USER,
