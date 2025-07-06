@@ -2,6 +2,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from '../dto/create-user.dto/create-user.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -9,7 +10,9 @@ import { Repository } from 'typeorm';
 import { User } from '../entities/users.entities.js';
 import { RefreshToken } from '../entities/refresh-token.entities.js';
 import { DataSource } from 'typeorm';
-import { User as UserType } from '@leet-code-clone/types';
+import { Role, User as UserType } from '@leet-code-clone/types';
+import { UpdateProfileDto } from '../dto/update-profile.dto/update-profile.dto.js';
+import { AllUsersDto } from '../dto/all-users.dto/all-users.dto.js';
 
 interface IRefreshToken {
   userId: number;
@@ -123,6 +126,57 @@ export class CommonRepository {
         throw new ConflictException('Email is already registered');
       }
       throw new InternalServerErrorException('Something went wrong');
+    }
+  }
+
+  async updateProfileInfo(id: number, updateProfileDto: UpdateProfileDto) {
+    try {
+      const result = await this.usersRepository.update(id, updateProfileDto);
+
+      if (result.affected === 0) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      }
+
+      const updatedUser = await this.usersRepository.findOneBy({ id });
+      return updatedUser;
+    } catch (error: any) {
+      console.error('[updateProfileInfo error]', error);
+      throw new InternalServerErrorException('Failed to update profile');
+    }
+  }
+
+  async getAllUsers() {
+    try {
+      const users = await this.usersRepository.find({
+        where: { role: Role.USER },
+      });
+      return users;
+    } catch (error) {
+      console.error('[get all users error]', error);
+      throw new InternalServerErrorException('Failed to Get Users Information');
+    }
+  }
+
+  async updateUserRole(user: AllUsersDto) {
+    try {
+      const id = user.id;
+      const userDat: Partial<User> = {
+        username: user.username,
+        role: Role.ADMIN,
+      };
+      const result = await this.usersRepository.update(id, userDat);
+      let isUpdated = false;
+
+      if (result.affected === 0) {
+        throw new NotFoundException(`User with ID ${id} not found`);
+      } else {
+        isUpdated = true;
+      }
+
+      return isUpdated;
+    } catch (error) {
+      console.error('[updateProfileRole error]', error);
+      throw new InternalServerErrorException('Failed to update profile');
     }
   }
 }

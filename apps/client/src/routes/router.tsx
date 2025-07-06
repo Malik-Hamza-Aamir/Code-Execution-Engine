@@ -2,7 +2,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Layoutv1 from "../layouts/layout.v1";
 import CustomErrorPage from "./customErrorPage";
 import ProtectedRoute from "./protectedRoute";
-import { Signup, Login, Explore, Problems, Solution, CallbackTokenLogin } from "../pages";
+import { Signup, Login, Explore, Problems, Solution, CallbackTokenLogin, Admin } from "../pages";
 
 const router = () => createBrowserRouter([
     {
@@ -40,6 +40,10 @@ const router = () => createBrowserRouter([
                         path: 'problems/:problemId',
                         element: <Solution />,
                     },
+                    {
+                        path: 'admin',
+                        element: <Admin />,
+                    }
                 ],
             },
         ],
