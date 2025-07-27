@@ -60,15 +60,16 @@ memberApi.interceptors.response.use(
         isRefreshing = false;
 
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+        window.location.href = '/login';
         return memberApi(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
         localStorage.removeItem('token');
+        window.location.href = '/login';
         return Promise.reject(refreshError);
       }
     }
 
-    window.location.href = '/login';
     return Promise.reject(error);
   }
 );

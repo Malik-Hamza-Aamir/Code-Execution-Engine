@@ -1,17 +1,29 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreateUserDto } from '../shared/dto/create-user.dto/create-user.dto.js';
 import * as bcrypt from 'bcrypt';
 import { LoginUserDto } from '../shared/dto/login-user.dto/login-user.dto.js';
 import { JwtService } from '@nestjs/jwt';
 import { Response } from 'express';
-import { CommonRepository } from '../shared/repository/common.repository.js';
+import { CommonRepository } from '../shared/module-services/common.repository.js';
 import { User, Provider, Role } from '@leet-code-clone/types';
+import Redis from 'ioredis';
+import { ResendService } from '../shared/module-services/resend-email.service.js';
+import { OtpDto } from '../shared/dto/otp.dto/otp.dto.js';
+import { UserResponseDto } from '../shared/dto/user-response.dto/user-response.dto.js';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly authRepository: CommonRepository,
-    private jwtService: JwtService
+    private readonly resendService: ResendService,
+    private jwtService: JwtService,
+    @Inject('REDIS_CLIENT') private readonly redis: Redis
   ) {}
 
   async register(createUserDto: CreateUserDto) {
@@ -36,8 +48,6 @@ export class AuthService {
       return { success: false, message: 'Invalid credentials' };
     }
 
-    const { password: _, ...userWithoutPassword } = user;
-
     const payload = {
       sub: user.id,
       email: user.email,
@@ -61,11 +71,15 @@ export class AuthService {
       expiresAt: expiresAt,
     });
 
+    const userResponseDto = plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+
     return {
       success: true,
       token: accessToken,
       refreshToken,
-      user: userWithoutPassword,
+      user: userResponseDto,
     };
   }
 
@@ -107,9 +121,9 @@ export class AuthService {
       email: user.emails[0].value,
       username: user._json.name,
       password: null,
-      githubId: provider === "github" ? user.id : null,
-      googleId: provider === "google" ? user.id : null,
-      provider: provider === "github" ? Provider.GITHUB : Provider.GOOGLE,
+      githubId: provider === 'github' ? user.id : null,
+      googleId: provider === 'google' ? user.id : null,
+      provider: provider === 'github' ? Provider.GITHUB : Provider.GOOGLE,
       imgUrl: user.photos[0].value,
       dob: null,
       role: Role.USER,
@@ -141,7 +155,10 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(jwtPayload, { expiresIn: '1d' });
 
-    const refreshToken = this.jwtService.sign(jwtPayload, { secret: process.env.JWT_REFRESH_SECRET, expiresIn: '7d' });
+    const refreshToken = this.jwtService.sign(jwtPayload, {
+      secret: process.env.JWT_REFRESH_SECRET,
+      expiresIn: '7d',
+    });
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
@@ -157,5 +174,62 @@ export class AuthService {
       token: accessToken,
       refreshToken,
     };
+  }
+
+  private generateOtp(): string {
+    // 6-digit OTP
+    return Math.floor(100000 + Math.random() * 900000).toString();
+  }
+
+  async forgotPassword(email: string) {
+    const otp = this.generateOtp();
+    const ttl = 600;
+    const key = `otp:${email}`;
+
+    await this.redis.set(key, otp, 'EX', ttl);
+    await this.resendService.sendEmail(
+      email,
+      'OTP Forget Password',
+      `<strong>OTP: ${otp}</strong>`
+    );
+
+    return { message: 'OTP sent to email' };
+  }
+
+  async verifyOtp(otpDto: OtpDto) {
+    const key = `otp:${otpDto.email}`;
+    const storedOtp = await this.redis.get(key);
+
+    if (!storedOtp) {
+      throw new BadRequestException('OTP expired');
+    }
+
+    if (storedOtp !== otpDto.otp) {
+      throw new UnauthorizedException('Invalid OTP');
+    }
+
+    await this.redis.del(key);
+
+    return true;
+  }
+
+  async resetPassword(resetPasswordDto: LoginUserDto) {
+    const email = resetPasswordDto.email;
+    const newPassword = resetPasswordDto.password;
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+    const result = await this.authRepository.updateProfileUsingEmail(
+      email,
+      hashedPassword
+    );
+
+    let message = 'Password reset unsuccessful';
+
+    if (result) {
+      message = 'Password reset successful';
+    }
+
+    return { message: message };
   }
 }

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import memberApi from '../../../utils/api.member.interceptor';
+import memberApi from '../../../interceptors/api.member.interceptor';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import {
@@ -18,6 +18,7 @@ export const useAuth = () => {
     try {
       const response = await memberApi.post(url, data);
       localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('userInfo',JSON.stringify(response.data.data.user));
       navigate(response.data.data.redirectUrl);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
@@ -41,9 +42,18 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+  const logout = async (url: string, id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await memberApi.post(url, { id });
+      localStorage.removeItem('token');
+      navigate(response.data.data.redirectUrl);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Logout Successful');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return { login, registerUser, logout, error, loading };

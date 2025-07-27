@@ -9,11 +9,15 @@ export type SignupFormData = z.infer<typeof signupSchema>;
 export type User = {
   username: string;
   email: string;
+  imgUrl: string | null;
+  role: Role;
   password: string | null;
   githubId: string | null;
   googleId: string | null;
   provider: Provider;
-  imgUrl: string | null;
   dob: string | null;
-  role: Role;
 };
+
+export type UserBasic = Omit<User, 'password' | 'googleId' | 'githubId' | 'provider' | 'dob'> & {
+  id: string;
+}

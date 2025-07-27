@@ -1,8 +1,10 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
   HttpStatus,
+  Param,
   Post,
   Req,
   Res,
@@ -19,6 +21,7 @@ import {
   JwtAuthGuard,
   JwtRefreshGuard,
 } from '@leet-code-clone/passport-auth';
+import { OtpDto } from '../shared/dto/otp.dto/otp.dto.js';
 
 @Controller('auth')
 export class AuthController {
@@ -57,6 +60,7 @@ export class AuthController {
     return new GenericResponseDto(true, 'Login successful', {
       token: result.token,
       redirectUrl: '/',
+      user: result.user,
     });
   }
 
@@ -106,7 +110,7 @@ export class AuthController {
   @Get('github/callback')
   @UseGuards(GitHubAuthGuard)
   async githubCallback(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.generateToken(req.user, "github");
+    const result = await this.authService.generateToken(req.user, 'github');
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
@@ -117,8 +121,7 @@ export class AuthController {
 
     return res.redirect(`http://localhost:4200/callback?token=${result.token}`);
   }
-  
-  
+
   @Get('google')
   @UseGuards(GoogleAuthGuard)
   googleLogin() {}
@@ -126,7 +129,7 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(GoogleAuthGuard)
   async googleCallback(@Req() req: Request, @Res() res: Response) {
-    const result = await this.authService.generateToken(req.user, "google");
+    const result = await this.authService.generateToken(req.user, 'google');
 
     res.cookie('refreshToken', result.refreshToken, {
       httpOnly: true,
@@ -136,5 +139,32 @@ export class AuthController {
     });
 
     return res.redirect(`http://localhost:4200/callback?token=${result.token}`);
+  }
+
+  // FORGET PASSWORD
+  @Post('forgot-password/:email')
+  async forgotPassword(@Param('email') email: string) {
+    if (!email) {
+      throw new BadRequestException('Email is Required');
+    }
+
+    const result = await this.authService.forgotPassword(email);
+    return new GenericResponseDto(true, result.message);
+  }
+
+  @Post('verify-otp')
+  async verifyOtp(@Body() otpDto: OtpDto) {
+    const result = await this.authService.verifyOtp(otpDto);
+    let message = 'Otp verified unsuccessfully';
+    if (result) {
+      message = 'Otp verified successfully';
+    }
+    return new GenericResponseDto(true, message);
+  }
+
+  @Post('reset-password')
+  async resetPassword(@Body() resetPasswordDto: LoginUserDto) {
+    const result = await this.authService.resetPassword(resetPasswordDto);
+    return new GenericResponseDto(true, result.message);
   }
 }

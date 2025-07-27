@@ -1,3 +1,35 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer utilities {
+  .pulse-ripple {
+    position: relative;
+    z-index: 1;
+  }
+
+  .pulse-ripple::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 150%;
+    height: 150%;
+    transform: translate(-50%, -50%);
+    background-color: theme('colors.purple.400' / 0.3); /* Lighter purple */
+    border-radius: 9999px;
+    animation: ripple 1.6s ease-out infinite;
+    z-index: -1;
+  }
+
+  @keyframes ripple {
+    0% {
+      transform: translate(-50%, -50%) scale(0.9);
+      opacity: 1;
+    }
+    100% {
+      transform: translate(-50%, -50%) scale(1.8);
+      opacity: 0;
+    }
+  }
+}

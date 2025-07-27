@@ -7,12 +7,12 @@ import {
 import { CreateUserDto } from '../dto/create-user.dto/create-user.dto.js';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from '../entities/users.entities.js';
-import { RefreshToken } from '../entities/refresh-token.entities.js';
 import { DataSource } from 'typeorm';
 import { Role, User as UserType } from '@leet-code-clone/types';
 import { UpdateProfileDto } from '../dto/update-profile.dto/update-profile.dto.js';
 import { AllUsersDto } from '../dto/all-users.dto/all-users.dto.js';
+import { User } from '../entities/users.entities.js';
+import { RefreshToken } from '../entities/refresh-token.entities.js';
 
 interface IRefreshToken {
   userId: number;
@@ -131,7 +131,10 @@ export class CommonRepository {
 
   async updateProfileInfo(id: number, updateProfileDto: UpdateProfileDto) {
     try {
-      const result = await this.usersRepository.update(id, updateProfileDto);
+      const result = await this.usersRepository.update(
+        { id },
+        updateProfileDto
+      );
 
       if (result.affected === 0) {
         throw new NotFoundException(`User with ID ${id} not found`);
@@ -142,6 +145,24 @@ export class CommonRepository {
     } catch (error: any) {
       console.error('[updateProfileInfo error]', error);
       throw new InternalServerErrorException('Failed to update profile');
+    }
+  }
+
+  async updateProfileUsingEmail(email: string, password: string) {
+    try {
+      const result = await this.usersRepository.update(
+        { email: email },
+        { password: password }
+      );
+
+      if (result.affected === 0) {
+        throw new NotFoundException(`User Not found`);
+      }
+
+      return true;
+    } catch (error: any) {
+      console.error('[updateProfileUsingEmail error]', error);
+      throw new InternalServerErrorException('Failed to update password');
     }
   }
 

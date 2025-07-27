@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { CommonRepository } from '../shared/repository/common.repository';
+import { CommonRepository } from '../shared/module-services/common.repository';
 import { UpdateProfileDto } from '../shared/dto/update-profile.dto/update-profile.dto';
 import { AllUsersDto } from '../shared/dto/all-users.dto/all-users.dto';
 
