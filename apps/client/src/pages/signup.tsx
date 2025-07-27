@@ -1,37 +1,19 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import api from '../utils/api.interceptor';
-import { useState } from 'react';
 import { signupSchema, SignupFormData } from "@leet-code-clone/types";
+import { useAuth } from '../features/auth/hooks/useAuth';
 
 export function Signup() {
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm<SignupFormData>({
-    resolver: zodResolver(signupSchema),
-  });
-
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const { register, handleSubmit, formState: { errors } } = useForm<SignupFormData>({ resolver: zodResolver(signupSchema) });
+  const { registerUser, error: authError, loading } = useAuth();
 
   const onSubmit = async (data: SignupFormData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await api.post('/auth/register', {
-        ...data,
-        dateOfBirth: new Date(data.dateOfBirth).toISOString()
-      });
-      localStorage.setItem('token', response.data.token);
-      window.location.href = '/';
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
-    }
+    const payload = {
+      ...data,
+      dob: new Date(data.dob).toISOString()
+    };
+    registerUser('/auth/register', payload);
   };
 
   return (
@@ -53,9 +35,9 @@ export function Signup() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-gray-800 py-8 px-4 shadow sm:rounded-lg sm:px-10">
-          {error && (
+          {authError && (
             <div className="mb-4 p-3 bg-red-900/50 text-red-200 rounded-md text-sm">
-              {error}
+              {authError}
             </div>
           )}
 
@@ -69,9 +51,8 @@ export function Signup() {
                   id="username"
                   type="text"
                   autoComplete="username"
-                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${
-                    errors.username ? 'border-red-500' : 'border-gray-600'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${errors.username ? 'border-red-500' : 'border-gray-600'
+                    }`}
                   {...register('username')}
                 />
                 {errors.username && (
@@ -89,9 +70,7 @@ export function Signup() {
                   id="email"
                   type="email"
                   autoComplete="email"
-                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${
-                    errors.email ? 'border-red-500' : 'border-gray-600'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${errors.email ? 'border-red-500' : 'border-gray-600'}`}
                   {...register('email')}
                 />
                 {errors.email && (
@@ -109,9 +88,8 @@ export function Signup() {
                   id="password"
                   type="password"
                   autoComplete="new-password"
-                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${
-                    errors.password ? 'border-red-500' : 'border-gray-600'
-                  }`}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${errors.password ? 'border-red-500' : 'border-gray-600'
+                    }`}
                   {...register('password')}
                 />
                 {errors.password && (
@@ -128,13 +106,12 @@ export function Signup() {
                 <input
                   id="dateOfBirth"
                   type="date"
-                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${
-                    errors.dateOfBirth ? 'border-red-500' : 'border-gray-600'
-                  }`}
-                  {...register('dateOfBirth')}
+                  className={`appearance-none block w-full px-3 py-2 border rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 bg-gray-700 text-white sm:text-sm ${errors.dob ? 'border-red-500' : 'border-gray-600'
+                    }`}
+                  {...register('dob')}
                 />
-                {errors.dateOfBirth && (
-                  <p className="mt-1 text-sm text-red-400">{errors.dateOfBirth.message}</p>
+                {errors.dob && (
+                  <p className="mt-1 text-sm text-red-400">{errors.dob.message}</p>
                 )}
               </div>
             </div>
@@ -143,9 +120,8 @@ export function Signup() {
               <button
                 type="submit"
                 disabled={loading}
-                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
-                  loading ? 'opacity-70 cursor-not-allowed' : ''
-                }`}
+                className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${loading ? 'opacity-70 cursor-not-allowed' : ''
+                  }`}
               >
                 {loading ? 'Creating account...' : 'Sign up'}
               </button>

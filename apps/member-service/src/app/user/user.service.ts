@@ -1,15 +1,54 @@
 import { Injectable } from '@nestjs/common';
-import { CommonRepository } from '../shared/repository/common.repository';
+import { CommonRepository } from '../shared/module-services/common.repository';
+import { UpdateProfileDto } from '../shared/dto/update-profile.dto/update-profile.dto';
+import { AllUsersDto } from '../shared/dto/all-users.dto/all-users.dto';
 
 @Injectable()
 export class UserService {
   constructor(private readonly repository: CommonRepository) {}
 
-  async getProfileById(id: string) {
-    return await this.repository.getProfileById(id);
+  async getProfileByEmail(email: string) {
+    const user = await this.repository.getUser(email);
+
+    if (user) {
+      return {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        imgUrl: user.imgURL,
+        dob: user.dob,
+        role: user.role,
+      };
+    }
+
+    return null;
   }
 
-  async getProfileByEmail(email: string) {
-    return await this.repository.getUser(email);
+  async updateProfile(id: number, updateProfileDto: UpdateProfileDto) {
+    const user = await this.repository.updateProfileInfo(id, updateProfileDto);
+    if (user) {
+      return {
+        id: user.id,
+        email: user.email,
+        username: user.username,
+        imgUrl: user.imgURL,
+        dob: user.dob,
+        role: user.role,
+      };
+    }
+
+    return null;
+  }
+
+  async getAllUsers() {
+    const users = await this.repository.getAllUsers();
+    return users.map(
+      (user) => new AllUsersDto(user.id, user.username, user.role)
+    );
+  }
+
+  async updateRole(userDto: AllUsersDto) {
+    const user = await this.repository.updateUserRole(userDto);
+    return user;
   }
 }

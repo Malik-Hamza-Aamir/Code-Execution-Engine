@@ -1,10 +1,5 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  CreateDateColumn,
-} from 'typeorm';
-import { Role } from './role.enum';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Role, Provider } from '@leet-code-clone/types';
 
 @Entity()
 export class User {
@@ -17,13 +12,22 @@ export class User {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ nullable: true })
   password: string;
 
   @Column({ nullable: true })
-  imgURL?: string;
+  githubId: string;
 
-  @Column()
+  @Column({ nullable: true })
+  googleId: string;
+
+  @Column({ type: 'enum', enum: Provider, default: Provider.LOCAL })
+  provider: string;
+
+  @Column({ nullable: true })
+  imgURL: string;
+
+  @Column({ nullable: true })
   dob: Date;
 
   @Column({ type: 'enum', enum: Role, default: Role.USER })

@@ -1,12 +1,14 @@
 import { useState } from 'react';
-import api from '../../../utils/api.interceptor';
-
-type LoginData = {
-  email: string;
-  password: string;
-};
+import memberApi from '../../../interceptors/api.member.interceptor';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import {
+  SignupFormData,
+  LoginFormData as LoginData,
+} from '@leet-code-clone/types';
 
 export const useAuth = () => {
+  const navigate = useNavigate();
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -14,9 +16,10 @@ export const useAuth = () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.post(url, data);
+      const response = await memberApi.post(url, data);
       localStorage.setItem('token', response.data.data.token);
-      return response.data;
+      localStorage.setItem('userInfo',JSON.stringify(response.data.data.user));
+      navigate(response.data.data.redirectUrl);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Login failed');
       throw err;
@@ -25,10 +28,33 @@ export const useAuth = () => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('token');
-    window.location.href = '/login';
+  const registerUser = async (url: string, data: SignupFormData) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await memberApi.post(url, data);
+      toast.success(response.data.message);
+      navigate(response.data.data.redirect);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  return { login, logout, error, loading };
+  const logout = async (url: string, id: string) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const response = await memberApi.post(url, { id });
+      localStorage.removeItem('token');
+      navigate(response.data.data.redirectUrl);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Logout Successful');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return { login, registerUser, logout, error, loading };
 };

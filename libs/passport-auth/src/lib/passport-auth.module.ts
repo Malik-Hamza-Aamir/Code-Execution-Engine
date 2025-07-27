@@ -8,6 +8,8 @@ import { PassportAuthService } from './passport-auth.service';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { JwtRefreshGuard } from './guards/jwt-refresh-auth.guard';
 import { GitHubAuthGuard } from './guards/github-auth.guard';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { GoogleStrategy } from './strategies/google.strategy';
 
 @Global()
 @Module({
@@ -23,7 +25,7 @@ import { GitHubAuthGuard } from './guards/github-auth.guard';
       }),
     }),
   ],
-  providers: [JwtStrategy, JwtAuthGuard, JwtRefreshStrategy, JwtRefreshGuard,PassportAuthService, GitHubStrategy, GitHubAuthGuard],
-  exports: [JwtStrategy, JwtModule, PassportAuthService, JwtAuthGuard, JwtRefreshGuard, GitHubStrategy, GitHubAuthGuard],
+  providers: [JwtStrategy, JwtAuthGuard, JwtRefreshStrategy, JwtRefreshGuard,PassportAuthService, GitHubStrategy, GitHubAuthGuard, GoogleAuthGuard, GoogleStrategy],
+  exports: [JwtStrategy, JwtModule, PassportAuthService, JwtAuthGuard, JwtRefreshGuard, GitHubStrategy, GitHubAuthGuard, GoogleAuthGuard, GoogleStrategy],
 })
 export class PassportAuthModule {}

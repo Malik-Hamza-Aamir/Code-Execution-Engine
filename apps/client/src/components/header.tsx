@@ -1,47 +1,46 @@
 import { Link, NavLink } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Dropdownmenu } from ".";
+import { useAuth } from "../features/auth/hooks/useAuth";
+import { useUser } from "../features/auth/hooks/useUser";
 
 export function Header() {
-    const [hasToken, setHasToken] = useState(false);
-    const [dropdownOpen, setDropdownOpen] = useState(false);
+    const token = localStorage.getItem("token");
+    const user = useUser();
 
-    useEffect(() => {
-        const token = localStorage.getItem("token");
-        setHasToken(!!token);
-    }, []);
+    const { logout } = useAuth();
 
     const handleLogout = () => {
-        localStorage.removeItem("token");
-        setHasToken(false);
-        setDropdownOpen(false);
+        const url = '/auth/logout';
+        if (user !== null) {
+            const id = user.id;
+            logout(url, id);
+        }
     };
 
     return (
         <nav className="bg-gray-900 text-gray-200 border-b border-gray-700 h-14 px-6 flex items-center justify-between">
             <div className="flex items-center h-full">
-                <Link 
-                    to="/" 
+                <Link
+                    to="/"
                     className="text-xl font-bold text-blue-400 hover:text-blue-300 mr-10"
                 >
                     LEETCODE
                 </Link>
-                
+
                 <div className="flex space-x-6 h-full">
-                    <NavLink 
-                        to="/" 
-                        className={({ isActive }) => 
-                            `flex items-center px-2 border-b-2 border-transparent hover:text-white transition-colors ${
-                                isActive ? "text-white border-blue-400" : "text-gray-400"
+                    <NavLink
+                        to="/"
+                        className={({ isActive }) =>
+                            `flex items-center px-2 border-b-2 border-transparent hover:text-white transition-colors ${isActive ? "text-white border-blue-400" : "text-gray-400"
                             }`
                         }
                     >
                         Explore
                     </NavLink>
-                    <NavLink 
-                        to="/problems" 
-                        className={({ isActive }) => 
-                            `flex items-center px-2 border-b-2 border-transparent hover:text-white transition-colors ${
-                                isActive ? "text-white border-blue-400" : "text-gray-400"
+                    <NavLink
+                        to="/problems"
+                        className={({ isActive }) =>
+                            `flex items-center px-2 border-b-2 border-transparent hover:text-white transition-colors ${isActive ? "text-white border-blue-400" : "text-gray-400"
                             }`
                         }
                     >
@@ -50,47 +49,26 @@ export function Header() {
                 </div>
             </div>
 
-            <div className="relative">
-                {hasToken ? (
-                    <div className="flex items-center">
-                        <button 
-                            onClick={() => setDropdownOpen(!dropdownOpen)}
-                            className="w-9 h-9 rounded-full bg-blue-500 flex items-center justify-center text-white font-medium focus:outline-none focus:ring-2 focus:ring-blue-300"
-                        >
-                            U
-                        </button>
-                        
-                        {dropdownOpen && (
-                            <div className="absolute right-0 mt-2 w-48 bg-gray-800 rounded-md shadow-lg py-1 z-10 border border-gray-700">
-                                <Link 
-                                    to="/settings" 
-                                    className="block px-4 py-2 text-gray-200 hover:bg-gray-700"
-                                    onClick={() => setDropdownOpen(false)}
-                                >
-                                    Settings
-                                </Link>
-                                <button
-                                    onClick={handleLogout}
-                                    className="block w-full text-left px-4 py-2 text-gray-200 hover:bg-gray-700"
-                                >
-                                    Logout
-                                </button>
+            {
+                token !== null ? (
+                    <Dropdownmenu align="right">
+                        <Dropdownmenu.Trigger>
+                            <div className="rounded-full border hover:shadow">
+                                <img src="/avatar.jpg" alt="Avatar" className="w-10 h-10 rounded-full" />
                             </div>
-                        )}
-                    </div>
+                        </Dropdownmenu.Trigger>
+                        <Dropdownmenu.Content>
+                            <Link to="/profile" className="block px-4 py-2 hover:bg-gray-100">Profile</Link>
+                            <div onClick={handleLogout} className="block px-4 py-2 hover:bg-gray-100">Logout</div>
+                        </Dropdownmenu.Content>
+                    </Dropdownmenu>
                 ) : (
-                    <NavLink 
-                        to="/login" 
-                        className={({ isActive }) => 
-                            `px-4 py-2 rounded-md font-medium transition-colors ${
-                                isActive ? "bg-blue-600 text-white" : "bg-blue-500 hover:bg-blue-600 text-white"
-                            }`
-                        }
-                    >
-                        Login
-                    </NavLink>
-                )}
-            </div>
+                    <Link
+                        to="/login"
+                        className="inline-flex items-center justify-center px-5 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition"
+                    >Login</Link>
+                )
+            }
         </nav>
     );
 }

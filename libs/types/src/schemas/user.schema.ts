@@ -20,7 +20,7 @@ export const signupSchema = z.object({
     .min(6, 'Password must be at least 6 characters')
     .regex(/[A-Z]/, 'Password must contain at least one uppercase letter')
     .regex(/[0-9]/, 'Password must contain at least one number'),
-  dateOfBirth: z.string().refine((val) => {
+  dob: z.string().refine((val) => {
     const date = new Date(val);
     const now = new Date();
     const minDate = new Date(
