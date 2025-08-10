@@ -14,7 +14,7 @@ export class SharedRepository {
   async getAllProblems() {
     try {
       const problems = await this.problemRepository.find({
-        select: ['id', 'title', 'difficulty', 'description', 'acceptanceCount']
+        select: ['id', 'title', 'difficulty', 'description', 'acceptanceCount', 'tags']
       });
       return problems;
     } catch (error) {
