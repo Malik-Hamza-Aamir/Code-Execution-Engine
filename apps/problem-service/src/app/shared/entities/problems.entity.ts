@@ -5,7 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
 } from 'typeorm';
-import { Difficulty } from "@leet-code-clone/types";
+import { Difficulty } from '@leet-code-clone/types';
 
 @Entity('problems')
 export class Problem {
@@ -29,6 +29,9 @@ export class Problem {
 
   @Column({ type: 'enum', enum: Difficulty, default: Difficulty.easy })
   difficulty: string;
+
+  @Column('jsonb', { nullable: true })
+  tags: string[];
 
   @Column({ type: 'int', default: 0 })
   acceptanceCount: number;

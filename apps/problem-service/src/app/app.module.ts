@@ -3,9 +3,11 @@ import Redis from 'ioredis';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedModule } from './shared/module-services/shared.module';
+import { ApiModule } from './api/api.module';
 
 @Module({
   imports: [
+    ApiModule,
     ConfigModule.forRoot({
       isGlobal: true,
     }),
