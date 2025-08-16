@@ -3,6 +3,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { SharedModule } from '../shared/module-services/shared.module.js';
 import { ApiService } from './api.service.js';
 import { ApiController } from './api.controller.js';
+import { JobsModule } from '../jobs/jobs.module.js';
 
 @Module({
   imports: [
@@ -10,6 +11,7 @@ import { ApiController } from './api.controller.js';
       secret: process.env.JWT_SECRET,
     }),
     SharedModule,
+    JobsModule,
   ],
   controllers: [ApiController],
   providers: [ApiService],

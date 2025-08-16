@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import Redis from 'ioredis';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedModule } from './shared/module-services/shared.module';
 import { ApiModule } from './api/api.module';
+import { BullModule } from '@nestjs/bullmq';
 
 @Module({
   imports: [
@@ -21,19 +21,13 @@ import { ApiModule } from './api/api.module';
       autoLoadEntities: true,
       synchronize: true,
     }),
+    BullModule.forRoot({
+      connection: {
+        host: process.env.REDIS_HOST,
+        port: Number(process.env.REDIS_PORT),
+      },
+    }),
     SharedModule,
   ],
-  providers: [
-    {
-      provide: 'REDIS_CLIENT',
-      useFactory: () => {
-        return new Redis({
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
-        });
-      },
-    },
-  ],
-  exports: ['REDIS_CLIENT'],
 })
 export class AppModule {}
