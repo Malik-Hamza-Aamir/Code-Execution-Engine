@@ -1,6 +1,9 @@
 import { Inject, Injectable, OnModuleInit } from '@nestjs/common';
 import Redis from 'ioredis';
 import { SharedRepository } from '../shared/module-services/repository';
+import { CreateProblemDto } from '../shared/dto/create-problem/create-problem.dto';
+import { ProblemQueue } from '../jobs/problem.queue';
+import { ProblemResponseDto } from '../shared/dto/problem-response/problem-response.dto';
 
 @Injectable()
 export class ApiService implements OnModuleInit {
@@ -8,10 +11,10 @@ export class ApiService implements OnModuleInit {
 
   constructor(
     @Inject('REDIS_CLIENT') private readonly redis: Redis,
-    private readonly repository: SharedRepository
+    private readonly repository: SharedRepository,
+    private readonly problemQueue: ProblemQueue
   ) {}
 
-  // when the server starts all problems will be stored in redis
   async onModuleInit() {
     const allProblems = await this.repository.getAllProblems();
     await this.redis.set(this.ALL_PROBLEMS_CACHE_KEY, JSON.stringify(allProblems));
@@ -39,5 +42,13 @@ export class ApiService implements OnModuleInit {
       limit,
       totalPages: Math.ceil(problems.length / limit),
     };
+  }
+
+  async createProblem(createProblemDto: CreateProblemDto) {
+    const problem = await this.repository.createProblem(createProblemDto);
+    const responseDto = new ProblemResponseDto(problem);
+    this.problemQueue.addProblemSyncJob(responseDto)
+
+    return responseDto;
   }
 }
