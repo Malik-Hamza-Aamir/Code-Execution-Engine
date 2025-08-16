@@ -2,12 +2,16 @@ import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job, Queue } from 'bullmq';
 import Redis from 'ioredis';
 import { Inject } from '@nestjs/common';
+import { Client } from '@elastic/elasticsearch';
 
 @Processor('problem')
 export class ProblemProcessor extends WorkerHost {
   private readonly dlq: Queue;
 
-  constructor(@Inject('REDIS_CLIENT') private readonly redis: Redis) {
+  constructor(
+    @Inject('REDIS_CLIENT') private readonly redis: Redis,
+    @Inject('ELASTICSEARCH_CLIENT') private readonly esClient: Client
+  ) {
     super();
     this.dlq = new Queue('problem-dlq', {
       connection: this.redis,
@@ -15,10 +19,10 @@ export class ProblemProcessor extends WorkerHost {
   }
 
   async process(job: Job<any, any, string>): Promise<any> {
-    const { name, id: jobId, data, opts } = job;    
+    const { name, id: jobId, data, opts } = job;
 
     try {
-      if (name === 'syncProblem') {        
+      if (name === 'syncProblem') {
         const { problem } = data;
 
         const key = 'problems:all';
@@ -27,6 +31,22 @@ export class ProblemProcessor extends WorkerHost {
         problems.push(problem);
 
         await this.redis.set(key, JSON.stringify(problems));
+
+        await this.esClient.index({
+          index: 'problems',
+          id: problem.id.toString(),
+          document: {
+            id: problem.id,
+            title: problem.title,
+            description: problem.description,
+            difficulty: problem.difficulty,
+            acceptanceCount: problem.acceptanceCount,
+            tags: problem.tags,
+          },
+          refresh: true,
+        });
+
+        console.log(`✅ Problem ${problem.id} synced to Redis + Elasticsearch`);
       }
     } catch (err) {
       if (job.attemptsMade >= (opts.attempts ?? 0)) {

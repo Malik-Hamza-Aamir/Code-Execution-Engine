@@ -3,6 +3,7 @@ import Redis from 'ioredis';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { SharedRepository } from './repository';
 import { Problem } from '../entities/problems.entity';
+import { Client } from '@elastic/elasticsearch';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Problem])],
@@ -16,8 +17,16 @@ import { Problem } from '../entities/problems.entity';
         });
       },
     },
+    {
+      provide: 'ELASTICSEARCH_CLIENT',
+      useFactory: () => {
+        return new Client({
+          node: `${process.env.ELASTICSEARCH_NODE}`,
+        });
+      },
+    },
     SharedRepository,
   ],
-  exports: ['REDIS_CLIENT', SharedRepository],
+  exports: ['REDIS_CLIENT', 'ELASTICSEARCH_CLIENT', SharedRepository],
 })
 export class SharedModule {}

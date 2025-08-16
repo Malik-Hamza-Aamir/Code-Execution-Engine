@@ -20,8 +20,13 @@ export class ApiController {
     @Query('difficulty') difficulty?: string,
     @Query('tags') tags?: string
   ) {
-    const tagList = tags ? tags.split(',').map(tag => tag.trim()) : [];
-    const { problems, total } = await this.apiService.getPaginatedProblems(page, limit, difficulty, tagList);
+    const tagList = tags ? tags.split(',').map((tag) => tag.trim()) : [];
+    const { problems, total } = await this.apiService.getPaginatedProblems(
+      page,
+      limit,
+      difficulty,
+      tagList
+    );
 
     return new GenericResponseDto(true, 'Problems fetched successfully', {
       problems,
@@ -29,6 +34,20 @@ export class ApiController {
       page,
       limit,
       totalPages: Math.ceil(total / limit),
+    });
+  }
+
+  @Get('search')
+  async searchProblems(
+    @Query('q') q: string,
+    @Query('difficulty') difficulty?: string,
+    @Query('tags') tags?: string
+  ) {
+    const tagList = tags ? tags.split(',').map((tag) => tag.trim()) : [];
+    const problems = await this.apiService.searchProblems(q, difficulty, tagList);
+
+    return new GenericResponseDto(true, 'Problems search results', {
+      problems,
     });
   }
 }

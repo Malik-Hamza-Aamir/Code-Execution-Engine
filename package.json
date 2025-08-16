@@ -5,6 +5,7 @@
   "scripts": {},
   "private": true,
   "dependencies": {
+    "@elastic/elasticsearch": "^8.19.0",
     "@hookform/resolvers": "^5.0.1",
     "@leet-code-clone/source": "file:",
     "@nestjs-modules/ioredis": "^2.0.2",
