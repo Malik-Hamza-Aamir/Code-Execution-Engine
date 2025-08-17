@@ -8,9 +8,8 @@ import { CreateProblemDto } from '../dto/create-problem/create-problem.dto';
 @Injectable()
 export class SharedRepository {
   constructor(
-    @InjectRepository(Problem) private problemRepository: Repository<Problem>
-  ) //private readonly dataSource: DataSource // for transactions
-  {}
+    @InjectRepository(Problem) private problemRepository: Repository<Problem> //private readonly dataSource: DataSource // for transactions
+  ) {}
 
   async createProblem(data: CreateProblemDto) {
     try {
@@ -23,13 +22,24 @@ export class SharedRepository {
 
   async getAllProblems() {
     try {
-      const problems = await this.problemRepository.find({
-        select: ['id', 'title', 'difficulty', 'description', 'acceptanceCount', 'tags']
-      });
+      const problems = await this.problemRepository.find();
       return problems;
     } catch (error) {
       console.log('[get problems error]', error);
-      throw new InternalServerErrorException('Failed to fetch user');
+      throw new InternalServerErrorException('Failed to fetch problem');
+    }
+  }
+
+  async getSingleProblem(problemId: number) {
+    try {
+      const problem = await this.problemRepository.find({
+        where: { id: problemId },
+      });
+
+      return problem;
+    } catch (error) {
+      console.log('[get single problem error]', error);
+      throw new InternalServerErrorException('Failed to fetch problem');
     }
   }
 }

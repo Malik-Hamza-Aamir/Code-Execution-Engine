@@ -66,11 +66,20 @@ export class ApiService implements OnModuleInit {
 
   async onModuleInit() {
     await this.ensureProblemsIndex();
-    const allProblems = await this.repository.getAllProblems();
+    const problems = await this.repository.getAllProblems();
+
+    const allProblems = await Promise.all(
+      problems.map(async (problem) => {
+        await this.redis.set(`problem:${problem.id}`, JSON.stringify(problem));
+        return new ProblemResponseDto(problem);
+      })
+    );
+
     await this.redis.set(
       this.ALL_PROBLEMS_CACHE_KEY,
       JSON.stringify(allProblems)
     );
+
     await this.syncProblemsToElasticsearch(allProblems);
   }
 
@@ -109,9 +118,9 @@ export class ApiService implements OnModuleInit {
 
   async createProblem(createProblemDto: CreateProblemDto) {
     const problem = await this.repository.createProblem(createProblemDto);
-    const responseDto = new ProblemResponseDto(problem);
-    this.problemQueue.addProblemSyncJob(responseDto);
+    this.problemQueue.addProblemSyncJob(problem);
 
+    const responseDto = new ProblemResponseDto(problem);
     return responseDto;
   }
 
@@ -122,7 +131,7 @@ export class ApiService implements OnModuleInit {
       must.push({
         multi_match: {
           query,
-          fields: ['title^3', 'description', 'tags'], 
+          fields: ['title^3', 'description', 'tags'],
         },
       });
     }
@@ -141,5 +150,18 @@ export class ApiService implements OnModuleInit {
     });
 
     return result.hits.hits.map((hit: any) => hit._source);
+  }
+
+  async getProblem(problemId: number) {
+    const cachedProblem = await this.redis.get(`problem:${problemId}`);
+    if (cachedProblem) {
+      return JSON.parse(cachedProblem);
+    }
+
+    let problem = await this.repository.getSingleProblem(problemId);
+
+    await this.redis.set(`problem:${problemId}`, JSON.stringify(problem));
+
+    return problem;
   }
 }

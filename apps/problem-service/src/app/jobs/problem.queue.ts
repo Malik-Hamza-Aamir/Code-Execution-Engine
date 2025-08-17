@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import Redis from 'ioredis';
-import { ProblemResponseDto } from '../shared/dto/problem-response/problem-response.dto';
 
 @Injectable()
 export class ProblemQueue {
@@ -13,7 +12,7 @@ export class ProblemQueue {
     });
   }
 
-  async addProblemSyncJob(problem: ProblemResponseDto) {
+  async addProblemSyncJob(problem: any) {
     await this.queue.add(
       'syncProblem',
       { problem },
