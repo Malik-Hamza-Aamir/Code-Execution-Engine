@@ -58,8 +58,6 @@ export class ApiController {
     }
 
     const result = await this.apiService.getProblem(Number(problemId));
-    return new GenericResponseDto(true, 'Problem Found', {
-      result
-    });
+    return new GenericResponseDto(true, 'Problem Found', result);
   }
 }
