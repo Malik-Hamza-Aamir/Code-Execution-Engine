@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { ApiService } from './api.service';
 import { GenericResponseDto } from '../shared/dto/generic-response.dto/generic-response.dto';
 import { CreateProblemDto } from '../shared/dto/create-problem/create-problem.dto';
@@ -49,5 +49,15 @@ export class ApiController {
     return new GenericResponseDto(true, 'Problems search results', {
       problems,
     });
+  }
+
+  @Get(':problemId')
+  async getProblem(@Param('problemId') problemId: string) {
+    if (!problemId) {
+      throw new BadRequestException('problemId is Required');
+    }
+
+    const result = await this.apiService.getProblem(Number(problemId));
+    return new GenericResponseDto(true, 'Problem Found', result);
   }
 }

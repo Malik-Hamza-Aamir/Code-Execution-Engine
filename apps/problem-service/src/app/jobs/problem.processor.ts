@@ -3,6 +3,7 @@ import { Job, Queue } from 'bullmq';
 import Redis from 'ioredis';
 import { Inject } from '@nestjs/common';
 import { Client } from '@elastic/elasticsearch';
+import { ProblemResponseDto } from '../shared/dto/problem-response/problem-response.dto';
 
 @Processor('problem')
 export class ProblemProcessor extends WorkerHost {
@@ -25,10 +26,13 @@ export class ProblemProcessor extends WorkerHost {
       if (name === 'syncProblem') {
         const { problem } = data;
 
+        await this.redis.set(`problem:${problem.id}`, JSON.stringify(problem));
+        const prob = new ProblemResponseDto(problem);
+        
         const key = 'problems:all';
         const existing = await this.redis.get(key);
         let problems = existing ? JSON.parse(existing) : [];
-        problems.push(problem);
+        problems.push(prob);
 
         await this.redis.set(key, JSON.stringify(problems));
 
