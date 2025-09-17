@@ -23,8 +23,11 @@ import { SharedModule } from '@leet-code-clone/shared';
     }),
     BullModule.forRoot({
       connection: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
+        host: process.env.UPSTASH_REDIS_HOST,
+        port: Number(process.env.UPSTASH_REDIS_PORT),
+        username: process.env.UPSTASH_REDIS_USERNAME,
+        password: process.env.UPSTASH_REDIS_PASSWORD,
+        tls: {},
       },
     }),
     SharedModule,
