@@ -30,7 +30,12 @@
           "watchDepsName": "watch-deps"
         }
       },
-      "exclude": ["libs/passport-auth/*", "libs/type/*", "libs/types/*"]
+      "exclude": [
+        "libs/passport-auth/*",
+        "libs/type/*",
+        "libs/types/*",
+        "libs/shared/*"
+      ]
     },
     {
       "plugin": "@nx/react/router-plugin",
@@ -69,7 +74,12 @@
     },
     {
       "plugin": "@nx/js/typescript",
-      "include": ["libs/passport-auth/*", "libs/type/*", "libs/types/*"],
+      "include": [
+        "libs/passport-auth/*",
+        "libs/type/*",
+        "libs/types/*",
+        "libs/shared/*"
+      ],
       "options": {
         "typecheck": {
           "targetName": "typecheck"
