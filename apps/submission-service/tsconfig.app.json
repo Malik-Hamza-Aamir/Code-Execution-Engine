@@ -1,0 +1,26 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "types": ["node"],
+    "rootDir": "src",
+    "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+    "experimentalDecorators": true,
+    "strictPropertyInitialization": false,
+    "emitDecoratorMetadata": true,
+    "target": "es2021"
+  },
+  "include": [
+    "src/**/*.ts",
+    "../../libs/shared/src/lib/repository.ts",
+    "../../libs/shared/src/lib/entities/submission.entity.ts",
+    "../../libs/shared/src/lib/dto/generic-response/generic-response.dto.ts",
+    "../../libs/shared/src/lib/dto/submit-code/submit-code.dto.ts"
+  ],
+  "exclude": [],
+  "references": [
+    {
+      "path": "../../libs/shared/tsconfig.lib.json"
+    }
+  ]
+}

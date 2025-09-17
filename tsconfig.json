@@ -16,10 +16,16 @@
       "path": "./libs/passport-auth"
     },
     {
-      "path": "./libs/types"
+      "path": "./apps/problem-service"
     },
     {
-      "path": "./apps/problem-service"
+      "path": "./apps/submission-service"
+    },
+    {
+      "path": "./libs/shared"
+    },
+    {
+      "path": "./apps/rce-service"
     }
   ]
 }
