@@ -20,6 +20,8 @@ export class ApiService {
       userId: body.userId,
       problemId: body.problemId,
       language: body.language,
+      functionSignature: body.functionSignature,
+      args: body.args,
       code: body.code,
     });
 

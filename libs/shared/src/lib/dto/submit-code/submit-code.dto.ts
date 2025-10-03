@@ -2,6 +2,7 @@ import {
   IsString,
   IsInt,
   IsNotEmpty,
+  IsArray,
 } from 'class-validator';
 
 export class SubmitCodeDto {
@@ -20,4 +21,13 @@ export class SubmitCodeDto {
   @IsString()
   @IsNotEmpty()
   code: string;
+
+  @IsString()
+  @IsNotEmpty()
+  functionSignature: string;
+
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty()
+  args: string[];
 }

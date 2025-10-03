@@ -15,40 +15,36 @@ export class WorkerProcessor extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<any> {
-    const { submissionId, language, code, problemId, functionName } = job.data;
+    const { submissionId, language, code, problemId, functionSignature, args } = job.data;
     await this.repository.updateSubmission(submissionId, { status: 'RUNNING' });
 
     let filePath: string | null = null;
 
     try {
-      // 1. Generate runnable code file from template
-      filePath = this.templateService.generateFile(
-        language,
-        code,
-        functionName,
-        job.id as any
-      );
+      filePath = this.templateService.generateFile(language, code, functionSignature, args, job.id as any);
 
-      // 2. Run inside sandbox
       const result = await this.sandbox.runCode(language, filePath, problemId);
 
+      // console.log(`[Job ${job.id}] Completed successfully.`, result);
+
       // 3. Update DB with results
-      await this.repository.updateSubmission(submissionId, {
-        status: 'FINISHED',
-        exec_time_ms: result.execTime,
-        memory_kb: result.memory,
-        result_summary: result.summary,
-      });
+      // await this.repository.updateSubmission(submissionId, {
+      //   status: 'FINISHED',
+      //   exec_time_ms: result.execTime,
+      //   memory_kb: result.memory,
+      //   result_summary: result.summary,
+      // });
 
       return result;
     } catch (err) {
+      console.error(`[Job ${job.id}] Failed with error:`, err);
       await this.repository.updateSubmission(submissionId, { status: 'ERROR' });
       throw err;
     } finally {
       // 4. Cleanup temp file
-      if (filePath) {
-        this.templateService.cleanupFile(filePath);
-      }
+      // if (filePath) {
+      //   this.templateService.cleanupFile(filePath);
+      // }
     }
   }
 }

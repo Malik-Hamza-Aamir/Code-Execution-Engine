@@ -14,4 +14,15 @@ export class SandboxService {
 
     return result;
   }
+  
+  async listAllPods() {
+    const k8s = await import('@kubernetes/client-node');
+
+    const kc = new k8s.KubeConfig();
+    kc.loadFromDefault();
+
+    const k8sApi = kc.makeApiClient(k8s.CoreV1Api);
+    const res = await k8sApi.listPodForAllNamespaces();
+    return res;
+  }
 }
