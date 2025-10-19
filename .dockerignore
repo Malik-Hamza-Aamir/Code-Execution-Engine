@@ -1,0 +1,12 @@
+# Ignore local dependencies and unnecessary files
+node_modules
+dist
+.git
+.gitignore
+Dockerfile
+apps/**/node_modules
+tmp
+.cache
+nx-cache
+*.log
+.env

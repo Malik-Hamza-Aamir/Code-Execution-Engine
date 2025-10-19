@@ -13,7 +13,10 @@ export class SharedRepository {
 
   async updateSubmission(submissionId: number, body: object) {
     try {
-      const submission = await this.submissionRepository.update(submissionId, body);
+      const submission = await this.submissionRepository.update(
+        submissionId,
+        body
+      );
       return submission;
     } catch (error: any) {
       console.log('[error]', error);
@@ -25,14 +28,13 @@ export class SharedRepository {
 
   async createSubmission(data: SubmitCodeDto) {
     try {
-      let obj = { ...data, status: 'Queued' };
+      const { functionSignature, args, testcasesUrl, ...submissionData } = data;
+      let obj = { ...submissionData, status: 'Queued' };
       const submission = this.submissionRepository.create(obj);
       return await this.submissionRepository.save(submission);
-    } catch (error: any) {
-      console.log('[error]', error);
-      throw new InternalServerErrorException(
-        'Something went wrong creating submission'
-      );
+    } catch (error) {
+      console.error('[createSubmission] Error:', error);
+      throw new InternalServerErrorException('Failed to create submission');
     }
   }
 

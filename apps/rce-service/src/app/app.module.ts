@@ -5,6 +5,7 @@ import { WorkerProcessor } from './worker.processor';
 import { SandboxService } from './sandbox/sandbox.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
+import { TemplateService } from './sandbox/template.service';
 
 @Module({
   imports: [
@@ -23,8 +24,11 @@ import { ConfigModule } from '@nestjs/config';
     }),
     BullModule.forRoot({
       connection: {
-        host: process.env.REDIS_HOST,
-        port: Number(process.env.REDIS_PORT),
+        host: process.env.UPSTASH_REDIS_HOST,
+        port: Number(process.env.UPSTASH_REDIS_PORT),
+        username: process.env.UPSTASH_REDIS_USERNAME,
+        password: process.env.UPSTASH_REDIS_PASSWORD,
+        tls: {},
       },
     }),
     BullModule.registerQueue({
@@ -32,6 +36,6 @@ import { ConfigModule } from '@nestjs/config';
     }),
     SharedModule,
   ],
-  providers: [WorkerProcessor, SandboxService],
+  providers: [WorkerProcessor, SandboxService, TemplateService],
 })
 export class AppModule {}

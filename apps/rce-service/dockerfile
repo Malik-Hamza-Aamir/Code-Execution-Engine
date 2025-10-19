@@ -1,0 +1,21 @@
+FROM node:20-slim
+
+RUN apt-get update && apt-get install -y \
+  python3 \
+  openjdk-17-jdk-headless \
+  g++ \
+  bash \
+  && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --omit=dev
+
+ARG CACHE_BREAKER=0
+COPY apps/rce-service/dist ./apps/rce-service/dist
+COPY apps/rce-service/src/app/templates ./templates
+COPY apps/rce-service/src/app/temporary_templates ./temporary_templates
+
+ENV NODE_ENV=production
+CMD ["node", "apps/rce-service/dist/main.js"]

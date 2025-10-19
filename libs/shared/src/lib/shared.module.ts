@@ -1,6 +1,7 @@
-import { Module } from '@nestjs/common';
-import Redis from 'ioredis';
+import 'dotenv/config';
+import { Module, Logger } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { Redis } from '@upstash/redis';
 import { SharedRepository } from './repository';
 import { Submission } from './entities/submission.entity';
 
@@ -10,10 +11,19 @@ import { Submission } from './entities/submission.entity';
     {
       provide: 'REDIS_CLIENT',
       useFactory: () => {
-        return new Redis({
-          host: process.env.REDIS_HOST,
-          port: Number(process.env.REDIS_PORT),
-        });
+        const url = process.env.UPSTASH_REDIS_REST_URL;
+        const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+        Logger.log('🔗 Connecting to Upstash Redis at:', url);
+        Logger.log('🔗 Connecting to Upstash Redis at:', token);
+
+        if (!url || !token) {
+          throw new Error(
+            '❌ UPSTASH_REDIS_URL or UPSTASH_REDIS_TOKEN is missing'
+          );
+        }
+
+        return new Redis({ url, token });
       },
     },
     SharedRepository,
