@@ -1,22 +1,26 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
 import { cppConverters, javaConverters, jsConverters } from '../helpers/utils';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class TemplateService {
-  private templatesPath = path.join(
-    process.cwd(),
-    'apps/rce-service/src/app/templates'
-  );
-  private tempPath = path.join(
-    process.cwd(),
-    'apps/rce-service/src/app/temporary_templates'
-  );
+  private readonly logger = new Logger(TemplateService.name);
 
-  constructor() {
-    if (!fs.existsSync(this.tempPath)) {
-      fs.mkdirSync(this.tempPath, { recursive: true });
+  private templatesPath;
+  private tempPath;
+
+  constructor(private readonly configService: ConfigService) {
+    const nodeEnv = this.configService.get<string>('NODE_ENV') || 'development';
+    const templatesEnvPath = this.configService.get<string>('TEMPLATES_PATH_ROOT') as string;
+
+    if (nodeEnv === 'production') {
+      this.templatesPath = path.resolve(process.cwd(), 'templates');
+      this.tempPath = path.resolve(process.cwd(), 'temporary_templates');
+    } else {
+      this.templatesPath = path.resolve(process.cwd(), templatesEnvPath, 'templates');
+      this.tempPath = path.resolve(process.cwd(), templatesEnvPath, 'temporary_templates');
     }
   }
 
@@ -115,16 +119,16 @@ export class TemplateService {
     throw new Error(`Unable to parse function name for ${language}`);
   }
 
-  generateFile(
-    language: string,
-    userCode: string,
-    functionSignature: string,
-    args: string[],
-    jobId: string | number
-  ): string {
-    const fileExtension = this.getFileExtension(language);
-    const filename = `${language}-${jobId}.${fileExtension}`;
-    const filePath = path.join(this.tempPath, filename);
+  generateFile(language: string, userCode: string, functionSignature: string, args: string[], jobId: string | number): string {
+    const fileExtension = this.getFileExtension(language);        // get file extension
+    const jobFolder = path.join(this.tempPath, `job-${jobId}`);   // create job folder inside temporary templates
+
+    if (!fs.existsSync(jobFolder)) {
+      fs.mkdirSync(jobFolder, { recursive: true });
+    }
+
+    const filename = `code.${fileExtension}`;
+    const filePath = path.join(jobFolder, filename);
 
     const templateCodeFile = this.getTemplateFile(language);
     const template = fs.readFileSync(templateCodeFile, 'utf8');
@@ -140,12 +144,23 @@ export class TemplateService {
       .replace('{{FUNCTION_NAME}}', functionName);
 
     fs.writeFileSync(filePath, finalCode);
-    return filePath;
+
+    const templateRunFile = path.join(this.templatesPath, language, 'run.sh');
+    const destinationRunFile = path.join(jobFolder, 'run.sh');
+    fs.copyFileSync(templateRunFile, destinationRunFile);
+
+    return jobFolder;
   }
 
   cleanupFile(filePath: string) {
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
+    }
+  }
+
+  cleanFolder(folderPath: string) {
+    if (fs.existsSync(folderPath)) {
+      fs.rmSync(folderPath, { recursive: true, force: true });
     }
   }
 

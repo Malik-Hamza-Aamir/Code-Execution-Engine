@@ -23,6 +23,7 @@ export class ApiService {
       functionSignature: body.functionSignature,
       args: body.args,
       code: body.code,
+      testcasesUrl: body.testcasesUrl,
     });
 
     return submission.id;

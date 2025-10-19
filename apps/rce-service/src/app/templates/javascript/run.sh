@@ -1,25 +1,22 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-# Path to the working directory where code.js and testcases.txt live
-WORK_DIR="$(dirname "$0")"
+TIMEOUT=5s
+MAIN_FILE="code.js"
 
-cd "$WORK_DIR"
+echo "Running JavaScript code..."
 
-echo "=== Running code.js with testcases.txt ==="
-
-# Check files
-if [ ! -f code.js ]; then
-  echo "ERROR: code.js not found" >&2
+# Ensure code.js exists
+if [ ! -f "$MAIN_FILE" ]; then
+  echo "Error: code.js not found."
   exit 1
 fi
 
-if [ ! -f testcases.txt ]; then
-  echo "ERROR: testcases.txt not found" >&2
+# Ensure testcases.txt exists
+if [ ! -f "testcases.txt" ]; then
+  echo "Error: testcases.txt not found."
   exit 1
 fi
 
-# Run with input redirection
-echo "=== Executing ==="
-node code.js < testcases.txt
-echo "=== Done ==="
+echo "=== Running test cases ==="
+timeout "$TIMEOUT" node "$MAIN_FILE" < "testcases.txt"

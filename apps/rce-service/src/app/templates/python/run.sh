@@ -1,26 +1,22 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-SRC_DIR="/runner"
-WORK_DIR="/tmp/build"
+TIMEOUT=5s
+SRC_FILE="code.py"
 
-mkdir -p "$WORK_DIR"
-cp "$SRC_DIR"/* "$WORK_DIR"/ 2>/dev/null || true
-cd "$WORK_DIR"
+echo "Running Python code..."
+
+# Ensure source exists
+if [ ! -f "$SRC_FILE" ]; then
+  echo "Error: code.py not found."
+  exit 1
+fi
+
+# Ensure testcases.txt exists
+if [ ! -f "testcases.txt" ]; then
+  echo "Error: testcases.txt not found."
+  exit 1
+fi
 
 echo "=== Running test cases ==="
-
-# Run with combined testcases.txt (if present)
-if [ -f testcases.txt ]; then
-  echo "--- Combined Testcases ---"
-  python3 code.py < testcases.txt
-fi
-
-# Run individually for each file inside tests/ (if present)
-if [ -d tests ]; then
-  for file in tests/*; do
-    [ -f "$file" ] || continue
-    echo "--- $(basename "$file") ---"
-    python3 code.py < "$file"
-  done
-fi
+timeout "$TIMEOUT" python3 "$SRC_FILE" < "testcases.txt"

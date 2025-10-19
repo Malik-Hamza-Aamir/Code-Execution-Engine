@@ -3,6 +3,9 @@ import { Job } from 'bullmq';
 import { SandboxService } from './sandbox/sandbox.service';
 import { SharedRepository } from '@leet-code-clone/shared';
 import { TemplateService } from './sandbox/template.service';
+import axios from 'axios';
+import * as fs from 'fs/promises';
+import * as path from 'path';
 
 @Processor('submissions')
 export class WorkerProcessor extends WorkerHost {
@@ -15,25 +18,45 @@ export class WorkerProcessor extends WorkerHost {
   }
 
   async process(job: Job<any>): Promise<any> {
-    const { submissionId, language, code, problemId, functionSignature, args } = job.data;
-    await this.repository.updateSubmission(submissionId, { status: 'RUNNING' });
+    const {
+      submissionId,
+      language,
+      code,
+      problemId,
+      functionSignature,
+      args,
+      testcasesUrl,
+    } = job.data;
 
     let filePath: string | null = null;
 
     try {
-      filePath = this.templateService.generateFile(language, code, functionSignature, args, job.id as any);
+      await this.repository.updateSubmission(submissionId, {
+        status: 'RUNNING',
+      });
+
+      filePath = this.templateService.generateFile(
+        language,
+        code,
+        functionSignature,
+        args,
+        job.id as any
+      );
+
+      const testcasesPath = path.join(filePath, 'testcases.txt');
+      const response = await axios.get(testcasesUrl, {
+        responseType: 'arraybuffer',
+      });
+      await fs.writeFile(testcasesPath, response.data);
 
       const result = await this.sandbox.runCode(language, filePath, problemId);
 
-      // console.log(`[Job ${job.id}] Completed successfully.`, result);
-
-      // 3. Update DB with results
-      // await this.repository.updateSubmission(submissionId, {
-      //   status: 'FINISHED',
-      //   exec_time_ms: result.execTime,
-      //   memory_kb: result.memory,
-      //   result_summary: result.summary,
-      // });
+      await this.repository.updateSubmission(submissionId, {
+        status: 'FINISHED',
+        exec_time_ms: result.execTime,
+        memory_kb: result.memory,
+        result_summary: result.summary,
+      });
 
       return result;
     } catch (err) {
@@ -41,10 +64,9 @@ export class WorkerProcessor extends WorkerHost {
       await this.repository.updateSubmission(submissionId, { status: 'ERROR' });
       throw err;
     } finally {
-      // 4. Cleanup temp file
-      // if (filePath) {
-      //   this.templateService.cleanupFile(filePath);
-      // }
+      if (filePath) {
+        this.templateService.cleanFolder(filePath);
+      }
     }
   }
 }

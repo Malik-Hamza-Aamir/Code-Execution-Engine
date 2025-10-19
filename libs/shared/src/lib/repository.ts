@@ -28,7 +28,7 @@ export class SharedRepository {
 
   async createSubmission(data: SubmitCodeDto) {
     try {
-      const { functionSignature, args, ...submissionData } = data;
+      const { functionSignature, args, testcasesUrl, ...submissionData } = data;
       let obj = { ...submissionData, status: 'Queued' };
       const submission = this.submissionRepository.create(obj);
       return await this.submissionRepository.save(submission);

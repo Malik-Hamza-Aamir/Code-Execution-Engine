@@ -1,9 +1,4 @@
-import {
-  IsString,
-  IsInt,
-  IsNotEmpty,
-  IsArray,
-} from 'class-validator';
+import { IsString, IsInt, IsNotEmpty, IsArray } from 'class-validator';
 
 export class SubmitCodeDto {
   @IsInt()
@@ -30,4 +25,8 @@ export class SubmitCodeDto {
   @IsString({ each: true })
   @IsNotEmpty()
   args: string[];
+
+  @IsString()
+  @IsNotEmpty()
+  testcasesUrl: string;
 }
