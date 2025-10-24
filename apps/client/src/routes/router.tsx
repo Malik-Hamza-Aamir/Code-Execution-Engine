@@ -1,58 +1,44 @@
 import { createBrowserRouter } from "react-router-dom";
-import Layoutv1 from "../layouts/layout.v1";
-import CustomErrorPage from "./customErrorPage";
+import { Public, Layoutv1 } from "../layouts";
 import ProtectedRoute from "./protectedRoute";
-import { Signup, Login, Explore, Problems, Solution, CallbackTokenLogin, Admin, ForgotPassword, Profile } from "../pages";
+import {
+    Landing, Login, Signup, Forgotpassword, 
+    Callbacktokenlogin, Customerror, Problems, 
+    Problemdetail, Usersettings, Adminsettings,
+    Adminproblems
+} from "../components/organisms";
 
 const router = () => createBrowserRouter([
     {
-        path: '/login',
-        element: <Login />,
-        errorElement: <CustomErrorPage />,
+        element: <Public />,
+        errorElement: <Customerror />,
+        children: [
+            { index: true, element: <Landing /> },
+            { path: '/login', element: <Login /> },
+            { path: '/signup', element: <Signup /> },
+            { path: '/forgot-password', element: <Forgotpassword /> },
+            { path: '/callback', element: <Callbacktokenlogin /> },
+        ]
     },
     {
-        path: '/signup',
-        element: <Signup />,
-        errorElement: <CustomErrorPage />,
-    },
-    {
-        path: '/forgot-password',
-        element: <ForgotPassword />,
-        errorElement: <CustomErrorPage />,
-    },
-    {
-        path: '/callback',
-        element: <CallbackTokenLogin />,
-        errorElement: <CustomErrorPage />,
+        element: <Layoutv1 />,
+        errorElement: <Customerror />,
+        children: [
+            { path: 'problems', element: <Problems /> },
+        ]
     },
     {
         path: '/',
         element: <Layoutv1 />,
-        errorElement: <CustomErrorPage />,
+        errorElement: <Customerror />,
         children: [
-            {
-                index: true,
-                element: <Explore />,
-            },
             {
                 element: <ProtectedRoute />,
                 children: [
-                    {
-                        path: 'problems',
-                        element: <Problems />,
-                    },
-                    {
-                        path: 'problems/:problemId',
-                        element: <Solution />,
-                    },
-                    {
-                        path: 'admin',
-                        element: <Admin />,
-                    },
-                    {
-                        path: 'profile',
-                        element: <Profile />,
-                    }
+                    { path: 'problems/:id', element: <Problemdetail /> },
+                    { path: 'settings', element: <Usersettings /> },
+                    { path: 'settings/admin', element: <Adminsettings /> },
+                    { path: 'admin/add-problem', element: <Adminproblems /> },
                 ],
             },
         ],

@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 
-export function CustomErrorPage() {
+export function Customerror() {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen text-center p-6">
             <div className="bg-white box-shadow-matas-plus rounded-lg p-10 max-w-lg mx-auto">
@@ -23,4 +23,4 @@ export function CustomErrorPage() {
     );
 };
 
-export default CustomErrorPage;
+export default Customerror;

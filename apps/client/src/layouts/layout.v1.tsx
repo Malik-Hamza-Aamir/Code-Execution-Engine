@@ -1,5 +1,5 @@
 import { Outlet } from "react-router-dom";
-import { Header } from "../components";
+import { Header } from "../components/molecules";
 
 export function Layoutv1() {
     return (
