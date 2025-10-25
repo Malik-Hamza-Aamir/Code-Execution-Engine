@@ -9,7 +9,7 @@ export function Input({ className = '', ...props }: InputProps) {
     return (
         <input
             {...props}
-            className={merge('px-3 py-2 border rounded-lg outline-none w-full shadow-sm border-surface-100 focus:ring-2 focus:ring-primary-200', className)}
+            className={merge('px-3 pt-[8px] pb-[9px] border rounded-md outline-none w-full shadow-sm focus:ring-1 focus:ring-black/50 text-black text-[14px] placeholder:text-[#b2b2b2]', className)}
         />
     )
 }

@@ -3,6 +3,9 @@
   "compilerOptions": {
     "outDir": "dist",
     "tsBuildInfoFile": "dist/tsconfig.app.tsbuildinfo",
+    // "moduleResolution": "node",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
     "jsx": "react-jsx",
     "lib": ["dom"],
     "types": [
