@@ -3,7 +3,7 @@ import { toast } from 'react-toastify';
 import { getRightError } from '../utils/helper';
 import memberApi from '../interceptors/api.member.interceptor';
 import { useNavigate } from 'react-router-dom';
-import { NewUserRegistration } from '../types/user.type';
+import { NewUserRegistration, LoginFormData } from '../types/user.type';
 
 const toastPropertiesFailure = {
   className: 'custom-toast-error',
@@ -19,11 +19,17 @@ export function useAuth() {
     loading: false,
   });
 
+  const [loginUserState, setLoginUserState] = useState({
+    data: null as any,
+    loading: false,
+  });
+
   const registerNewUser = async (url: string, body: NewUserRegistration) => {
     setRegisterNewUserState({ data: null, loading: true });
     try {
-      const response = await memberApi.post(url, body);
+      const response = await memberApi.post(url, body);      
       navigate(response.data.data.redirect);
+      setRegisterNewUserState({ data: response.data.data, loading: false });
     } catch (err: any) {
       const error = getRightError(err);
       console.log('[Register New User ERR]', err);
@@ -32,5 +38,21 @@ export function useAuth() {
     }
   };
 
-  return { registerNewUser, registerNewUserState };
+  const login = async (url: string, data: LoginFormData) => {
+    setLoginUserState({ data: null, loading: true });
+    try {
+      const response = await memberApi.post(url, data);
+      localStorage.setItem('token', response.data.data.token);
+      localStorage.setItem('userInfo', JSON.stringify(response.data.data.user));
+      setLoginUserState({ data: response.data.data, loading: false });
+      navigate(response.data.data.redirectUrl);
+    } catch (err: any) {
+      const error = getRightError(err);
+      console.log('[Login User ERR]', err);
+      setLoginUserState({ data: null, loading: false });
+      toast(error, toastPropertiesFailure);
+    }
+  };
+
+  return { registerNewUser, login, registerNewUserState, loginUserState };
 }

@@ -1,32 +1,30 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Eye, EyeOff, Loader2Icon, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HiLightningBolt } from "react-icons/hi";
 import Input from '../ui/input';
 import Button from '../ui/button';
 import { SocialLogin } from '../molecules';
-
-const loginSchema = z.object({
-    email: z.string().email("Please enter a valid email address"),
-    password: z.string().min(6, "Password must be at least 6 characters"),
-});
+import { LoginSchema } from '../../schemas/member.schema';
+import { LoginFormData } from '../../types/user.type';
+import { useAuth } from '../../hooks/useAuth';
 
 export function Login() {
     const [showPassword, setShowPassword] = useState(false);
+    const { login } = useAuth();
 
     const {
         register,
         handleSubmit,
         formState: { errors, isSubmitting },
     } = useForm({
-        resolver: zodResolver(loginSchema),
+        resolver: zodResolver(LoginSchema),
     });
 
-    const onSubmit = async (data: any) => {
-        console.log("Login Data:", data);
+    const onSubmit = async (data: LoginFormData) => {
+        await login('/auth/login', data);
     };
 
     return (
