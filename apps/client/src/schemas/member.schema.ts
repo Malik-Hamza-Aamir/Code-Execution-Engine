@@ -33,3 +33,21 @@ export const LoginSchema = z.object({
       'Password must include at least one number and one special character'
     ),
 });
+
+export const EmailSchema = z.object({
+  email: z.string().email('Enter a valid email address'),
+});
+
+export const OTPSchema = z.object({
+  otp: z.string().length(6, 'OTP must be 6 digits'),
+});
+
+export const UpdatePasswordSchema = z
+  .object({
+    password: z.string().min(6, 'Password must be at least 6 characters'),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    path: ['confirmPassword'],
+    message: 'Passwords do not match',
+  });
