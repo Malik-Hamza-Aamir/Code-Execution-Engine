@@ -6,8 +6,8 @@ import { Eye, EyeOff, Loader2Icon, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HiLightningBolt } from "react-icons/hi";
 import Input from '../ui/input';
-import { ImGithub } from "react-icons/im";
-import { FcGoogle } from "react-icons/fc";
+import Button from '../ui/button';
+import { SocialLogin } from '../molecules';
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email address"),
@@ -96,14 +96,14 @@ export function Login() {
                         </Link>
                     </div>
 
-                    <button
+                    <Button
                         type="submit"
                         disabled={isSubmitting}
-                        className="w-full py-[8px] mt-1 bg-black hover:bg-black/90 text-white rounded-md font-medium transition-colors duration-200 disabled:opacity-60 relative"
+                        className="bg-black hover:bg-black/90 text-white"
                     >
                         {isSubmitting ? <Loader2Icon className="animate-spin" /> : "Login"}
                         <ChevronRight className='absolute top-3 right-2' size={15} />
-                    </button>
+                    </Button>
                 </form>
 
                 <div className="flex items-center">
@@ -112,25 +112,7 @@ export function Login() {
                     <div className="flex-1 h-px bg-gray-600" />
                 </div>
 
-                <div className="space-y-3">
-                    <button
-                        type="button"
-                        className="w-full py-[8px] border shadow-sm text-black hover:bg-gray-100/50 rounded-md font-medium transition-colors duration-200 flex items-start justify-center gap-2"
-                    >
-                        <FcGoogle className='text-2xl' />
-                        <span>
-                            Continue with Google
-                        </span>
-                    </button>
-
-                    <button
-                        type="button"
-                        className="w-full py-[8px] border shadow-sm text-black hover:bg-gray-100/50 rounded-md font-medium transition-colors duration-200 flex items-start justify-center gap-2"
-                    >
-                        <ImGithub className='text-xl mt-[2px]' />
-                        Continue with GitHub
-                    </button>
-                </div>
+                <SocialLogin />
 
                 <p className="text-center text-sm text-gray-500 mt-6">
                     Don’t have an account?{" "}

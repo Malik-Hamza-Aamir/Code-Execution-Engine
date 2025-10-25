@@ -1,60 +1,36 @@
 import { useState } from 'react';
-import memberApi from '../../../interceptors/api.member.interceptor';
-import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import {
-  SignupFormData,
-  LoginFormData as LoginData,
-} from '@leet-code-clone/types';
+import { getRightError } from '../utils/helper';
+import memberApi from '../interceptors/api.member.interceptor';
+import { useNavigate } from 'react-router-dom';
+import { NewUserRegistration } from '../types/user.type';
 
-export const useAuth = () => {
+const toastPropertiesFailure = {
+  className: 'custom-toast-error',
+  hideProgressBar: true,
+  autoClose: 1500,
+};
+
+export function useAuth() {
   const navigate = useNavigate();
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
 
-  const login = async (url: string, data: LoginData) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await memberApi.post(url, data);
-      localStorage.setItem('token', response.data.data.token);
-      localStorage.setItem('userInfo',JSON.stringify(response.data.data.user));
-      navigate(response.data.data.redirectUrl);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Login failed');
-      throw err;
-    } finally {
-      setLoading(false);
-    }
-  };
+  const [registerNewUserState, setRegisterNewUserState] = useState({
+    data: null as any,
+    loading: false,
+  });
 
-  const registerUser = async (url: string, data: SignupFormData) => {
-    setLoading(true);
-    setError(null);
+  const registerNewUser = async (url: string, body: NewUserRegistration) => {
+    setRegisterNewUserState({ data: null, loading: true });
     try {
-      const response = await memberApi.post(url, data);
-      toast.success(response.data.message);
+      const response = await memberApi.post(url, body);
       navigate(response.data.data.redirect);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Registration failed');
-    } finally {
-      setLoading(false);
+      const error = getRightError(err);
+      console.log('[Register New User ERR]', err);
+      setRegisterNewUserState({ data: null, loading: false });
+      toast(error, toastPropertiesFailure);
     }
   };
 
-  const logout = async (url: string, id: string) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await memberApi.post(url, { id });
-      localStorage.removeItem('token');
-      navigate(response.data.data.redirectUrl);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Logout Successful');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return { login, registerUser, logout, error, loading };
-};
+  return { registerNewUser, registerNewUserState };
+}

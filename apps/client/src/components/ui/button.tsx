@@ -9,7 +9,7 @@ export function Button({ className = "", children, ...rest }: ButtonProps) {
     return (
         <button
             className={merge(
-                "inline-flex items-center justify-center px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700 transition",
+                "w-full py-[8px] border shadow-sm text-black hover:bg-gray-100/50 rounded-md font-medium transition-colors duration-200 flex items-start justify-center gap-2 disabled:opacity-60 relative",
                 className
             )}
             {...rest}

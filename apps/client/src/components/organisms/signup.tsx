@@ -1,12 +1,9 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState, useEffect } from "react";
 import { useForm, Controller } from "react-hook-form";
-import { z } from "zod";
 import { Eye, EyeOff, Loader2Icon, ChevronRight } from "lucide-react";
 import { Link } from "react-router-dom";
 import { HiLightningBolt } from "react-icons/hi";
-import { ImGithub } from "react-icons/im";
-import { FcGoogle } from "react-icons/fc";
 import Input from "../ui/input";
 import Select, {
   SelectTrigger,
@@ -14,45 +11,16 @@ import Select, {
   SelectGroup,
   SelectItem,
 } from "../ui/select";
-
-const currentYear = new Date().getFullYear();
-const years = Array.from({ length: currentYear - 1969 }, (_, i) => 1970 + i);
-const months = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December",
-];
-const days = Array.from({ length: 31 }, (_, i) => i + 1);
-
-const SignupSchema = z
-  .object({
-    username: z.string().min(1, "Username is required"),
-    email: z.string().email("Please enter a valid email address"),
-    password: z
-      .string()
-      .min(8, "Password must be at least 8 characters long")
-      .regex(
-        /^(?=.*[0-9])(?=.*[!@#$%^&*])/,
-        "Password must include at least one number and one special character"
-      ),
-    confirmPassword: z.string().min(1, "Confirm password is required"),
-    dateOfBirth: z.object({
-      day: z.string().min(1, "Select day"),
-      month: z.string().min(1, "Select month"),
-      year: z.string().min(1, "Select year"),
-    }),
-  })
-  .refine(
-    (data) => data.password === data.confirmPassword,
-    {
-      message: "Passwords do not match",
-      path: ["confirmPassword"],
-    }
-  );
-
-type SignupFormData = z.infer<typeof SignupSchema>;
+import { useAuth } from "../../hooks/useAuth";
+import { SignupSchema } from "../../schemas/member.schema";
+import { days, months, years } from "../../constants/date";
+import { SignupFormData } from "../../types/user.type";
+import Button from "../ui/button";
+import { SocialLogin } from "../molecules";
 
 export function Signup() {
   const [showPassword, setShowPassword] = useState(false);
+  const { registerNewUser } = useAuth();
 
   const {
     register,
@@ -84,13 +52,12 @@ export function Signup() {
   }, [passwordValue, confirmPasswordValue, setError, clearErrors]);
 
   const onSubmit = async (data: SignupFormData) => {
+    let { confirmPassword, dateOfBirth, ...body } = data;
     const { day, month, year } = data.dateOfBirth;
-    const dateOfBirth = new Date(`${month} ${day}, ${year}`);
+    const dob = new Date(`${month} ${day}, ${year}`).toISOString();
+    let payload = { ...body, dob: dob };
 
-    console.log("✅ Signup Data:", {
-      ...data,
-      dateOfBirth,
-    });
+    registerNewUser('/auth/register', payload);
   };
 
   return (
@@ -272,14 +239,14 @@ export function Signup() {
             )}
           </div>
 
-          <button
+          <Button
             type="submit"
             disabled={isSubmitting}
-            className="w-full py-[8px] mt-1 bg-black hover:bg-black/90 text-white rounded-md font-medium transition-colors duration-200 disabled:opacity-60 relative"
+            className="bg-black hover:bg-black/90 text-white"
           >
             {isSubmitting ? <Loader2Icon className="animate-spin" /> : "Sign Up"}
             <ChevronRight className="absolute top-3 right-2" size={15} />
-          </button>
+          </Button>
         </form>
 
         <div className="flex items-center">
@@ -288,23 +255,7 @@ export function Signup() {
           <div className="flex-1 h-px bg-gray-600" />
         </div>
 
-        <div className="space-y-3">
-          <button
-            type="button"
-            className="w-full py-[8px] border shadow-sm text-black hover:bg-gray-100/50 rounded-md font-medium transition-colors duration-200 flex items-start justify-center gap-2"
-          >
-            <FcGoogle className="text-2xl" />
-            <span>Continue with Google</span>
-          </button>
-
-          <button
-            type="button"
-            className="w-full py-[8px] border shadow-sm text-black hover:bg-gray-100/50 rounded-md font-medium transition-colors duration-200 flex items-start justify-center gap-2"
-          >
-            <ImGithub className="text-xl mt-[2px]" />
-            Continue with GitHub
-          </button>
-        </div>
+        <SocialLogin />
 
         <p className="text-center text-sm text-gray-500 mt-6">
           Already have an account?{" "}
