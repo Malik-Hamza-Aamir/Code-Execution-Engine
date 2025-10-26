@@ -15,7 +15,7 @@ export function Forgotpassword() {
     const [showPassword, setShowPassword] = useState(false);
     const [step, setStep] = useState<"email" | "otp" | "updatePassword">("email");
     const [email, setEmail] = useState<string>("");
-    const { forgetPassword, verifyOtp, resetPassword } = useAuth();
+    const { forgetPassword, forgetPasswordState, verifyOtp, verifyOtpState, resetPassword, resetPasswordState } = useAuth();
 
     const emailForm = useForm<z.infer<typeof EmailSchema>>({
         resolver: zodResolver(EmailSchema),
@@ -48,7 +48,7 @@ export function Forgotpassword() {
 
     const renderStepForm = () => {
         if (step === "email") {
-            const { register, handleSubmit, formState: { errors, isSubmitting } } = emailForm;
+            const { register, handleSubmit, formState: { errors } } = emailForm;
             return (
                 <form onSubmit={handleSubmit(handleEmailSubmit)}>
                     <div className="h-[90px] relative flex flex-col gap-[6px]">
@@ -76,10 +76,10 @@ export function Forgotpassword() {
                         </Link>
                         <Button
                             type="submit"
-                            disabled={isSubmitting}
+                            disabled={forgetPasswordState.loading}
                             className="bg-black hover:bg-black/90 text-white"
                         >
-                            {isSubmitting ? <Loader2Icon className="animate-spin" /> : "Send OTP"}
+                            {forgetPasswordState.loading ? <Loader2Icon className="animate-spin" /> : "Send OTP"}
                             <ChevronRight className="absolute top-3 right-2" size={15} />
                         </Button>
                     </div>
@@ -88,7 +88,7 @@ export function Forgotpassword() {
         }
 
         if (step === "otp") {
-            const { handleSubmit, formState: { errors, isSubmitting }, setValue } = otpForm;
+            const { handleSubmit, formState: { errors }, setValue } = otpForm;
             return (
                 <form onSubmit={handleSubmit(handleOtpSubmit)}>
                     <div className="h-[90px] relative flex flex-col gap-[6px]">
@@ -103,10 +103,10 @@ export function Forgotpassword() {
                     </div>
                     <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={verifyOtpState.loading}
                         className="bg-black hover:bg-black/90 text-white mt-3"
                     >
-                        {isSubmitting ? <Loader2Icon className="animate-spin" /> : "Verify OTP"}
+                        {verifyOtpState.loading ? <Loader2Icon className="animate-spin" /> : "Verify OTP"}
                         <ChevronRight className="absolute top-3 right-2" size={15} />
                     </Button>
                 </form>
@@ -114,7 +114,7 @@ export function Forgotpassword() {
         }
 
         if (step === "updatePassword") {
-            const { register, handleSubmit, formState: { errors, isSubmitting } } = passwordForm;
+            const { register, handleSubmit, formState: { errors } } = passwordForm;
             return (
                 <form onSubmit={handleSubmit(handlePasswordSubmit)}>
                     <div className="h-[90px] relative flex flex-col gap-[6px]">
@@ -158,10 +158,10 @@ export function Forgotpassword() {
 
                     <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={resetPasswordState.loading}
                         className="bg-black hover:bg-black/90 text-white mt-3"
                     >
-                        {isSubmitting ? <Loader2Icon className="animate-spin" /> : "Update Password"}
+                        {resetPasswordState.loading ? <Loader2Icon className="animate-spin" /> : "Update Password"}
                         <ChevronRight className="absolute top-3 right-2" size={15} />
                     </Button>
                 </form>

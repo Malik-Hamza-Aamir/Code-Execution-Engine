@@ -13,12 +13,12 @@ import { useAuth } from '../../hooks/useAuth';
 
 export function Login() {
     const [showPassword, setShowPassword] = useState(false);
-    const { login } = useAuth();
+    const { login, loginUserState } = useAuth();
 
     const {
         register,
         handleSubmit,
-        formState: { errors, isSubmitting },
+        formState: { errors },
     } = useForm({
         resolver: zodResolver(LoginSchema),
     });
@@ -96,10 +96,10 @@ export function Login() {
 
                     <Button
                         type="submit"
-                        disabled={isSubmitting}
+                        disabled={loginUserState.loading}
                         className="bg-black hover:bg-black/90 text-white"
                     >
-                        {isSubmitting ? <Loader2Icon className="animate-spin" /> : "Login"}
+                        {loginUserState.loading ? <Loader2Icon className="animate-spin" /> : "Login"}
                         <ChevronRight className='absolute top-3 right-2' size={15} />
                     </Button>
                 </form>
