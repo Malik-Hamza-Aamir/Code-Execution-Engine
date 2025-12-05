@@ -10,3 +10,22 @@ export const getRightError = (err: any) => {
 
   return error;
 };
+
+export const getNameInitials = (name: string): string => {
+  const nameArr = name.split(' ');
+  const arrLen = nameArr.length;
+
+  if (arrLen === 0) {
+    return '';
+  }
+
+  if (arrLen === 1) {
+    return nameArr[0].substring(0, 1).toUpperCase();
+  }
+
+  const initials: string = (
+    nameArr[0].substring(0, 1) + nameArr[arrLen - 1].substring(0, 1)
+  ).toUpperCase();
+
+  return initials;
+};
